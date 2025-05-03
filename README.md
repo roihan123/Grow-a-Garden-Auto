@@ -1,9 +1,5 @@
 # Virage Grow A Garden Macro
 A macro for the Roblox game "Grow a Garden"
-Also, make sure your display resolution is 1920x1080 and  scale is set to 100%! (you can check this in your windows settings) Finally, __do not__ put Roblox in fullscreen or else it won't work!
-
-# dolphSol Macro
- A macro for the Roblox game "Sol's RNG", including features such as obby completion and item collection. A work in progress - BuilderDolphin
 
  ## Installation
  - First of all, you need to download [AutoHotKey v1.1](https://www.autohotkey.com/) (Not 2.0), and run the installer
