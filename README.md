@@ -14,4 +14,4 @@ Virage Grow A Garden Macro has a couple of different features it is capable of. 
  - Automatic Buying From all Shops, with the options to check the items you want the macro to purchase
  - Automatic Crops Collecting and Selling, so you can afk and get Sheckles
 
- Discord Server: [https://discord.com/invite/BPPSAG8MN5]
+ Discord Server: [https://discord.com/invite/VirageMacros](https://discord.com/invite/BPPSAG8MN5)
