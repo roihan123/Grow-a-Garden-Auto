@@ -208,10 +208,10 @@ if WinExist("Roblox")
     if (!started) {
         started    := true
 
-/*
+
         ; ← start background OCR every 300ms
         SetTimer, ScanForNotifications, 300
-*/
+
 
         LogDebug("Macro started")
         Gosub, collecting
@@ -1067,6 +1067,7 @@ SaveSettings:
 Return
 
 ; ─── temp 
+/*
 F4::
     actionQueue.Push("seedShopPath")
     actionQueue.Push("slot" slotChoice "GearShopPath")
@@ -1076,6 +1077,7 @@ F3::
     ; actionQueue.Push("sell")
     actionQueue.Push("slot" slotChoice "EggShopPath")
 Return
+*/
 
 ; ─── common STOP/RELOAD routine ───────────────────────────────────────────────
 
