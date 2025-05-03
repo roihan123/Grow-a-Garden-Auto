@@ -35,7 +35,8 @@ ScaleRegion(refX, refY, refW, refH) {
 
 
 global lastNotificationTime := { backpack: 0
-                              , gear:      0}
+                              , gear:      0
+                              , egg:       0}
 global debounceMs := 200000
 
 
@@ -124,22 +125,11 @@ ShowGui:
         Gui, Add, Checkbox, % "x40 y" y " vGearItem" A_Index " " . (gVal ? "Checked" : "") , % gearItems[A_Index]
     }
 
-Gui, Add, Text,      x300 y50 w260 h260 BackgroundDDDDDD
-Gui, Font,          c808080 s9, Segoe UI
-Gui, Add, GroupBox, x300 y50 w260 h260 Disabled, [NEW!] Egg Shop
-Gui, Font
-Gui, Add, Checkbox, x320 y70 Disabled vEggBuyAll, Buy All Eggs
+Gui, Add, GroupBox, x300 y50 w260 h260, [NEW!] Egg Shop
+IniRead, EggBuyAll, %settingsFile%, Egg, BuyAll, 0
+Gui, Add, Checkbox, % "x320 y70 vEggBuyAll" . (EggBuyAll ? " Checked" : ""), Buy All Eggs
 
-Gui, Add, Picture,  x280 y30 w300 h300 vLockPic +BackgroundTrans, %A_ScriptDir%\Images\lock.png
 
-Gui, Add, Text,     x339 y164 w182 h38 Border +BackgroundTrans
-Gui, Add, Picture,  x340 y165 w180 h36 gBuyPremium, %A_ScriptDir%\Images\gold_gradient.png
-
-Gui, Font,          cFFFFFF s11 Bold, Segoe UI
-Gui, Add, Text,     x340 y173 w180 h20 Center +BackgroundTrans, Buy Premium (59 Robux)
-Gui, Font
-
-    Gui, Font, s9 Bold, Segoe UI
     Gui, Add, GroupBox, x20 y350 w540 h260, Seed Shop Items
     Loop, % seedItems.Length() {
         IniRead, sVal, %settingsFile%, Seed, Item%A_Index%, 0
@@ -236,7 +226,7 @@ alignment:
     Send, {i up}
     Sleep, 200
     Send, {o down}
-    Sleep, 200
+    Sleep, 180
     Send, {o up}
     Sleep, 200
 Return
@@ -287,6 +277,24 @@ buyGearSeed:
     SetTimer, ScanForNotifications, On
 
     LogDebug("buyGearSeed complete")
+Return
+
+buyEggShop:
+    currentSection := "buyEggShop"
+    LogDebug("buyEggShop entered")
+
+    ; — suspend OCR so it can't interrupt our clicks —
+    SetTimer, ScanForNotifications, Off
+
+if (EggBuyAll) {
+    Gosub, % "slot" slotChoice "EggShopPath"
+} 
+
+        
+    ; — restore OCR timer when done —
+    SetTimer, ScanForNotifications, On
+
+    LogDebug("buyEggShop complete")
 Return
 
 
@@ -395,6 +403,14 @@ ScanForNotifications:
             LogDebug("→ Enqueued buyGearSeed")
         }
     }
+    ; — egg shop debounce —
+    if InStr(cleaned, "egg") {
+        if (now - lastNotificationTime.egg > debounceMs) {
+            actionQueue.Push("buyEggShop")
+            lastNotificationTime.egg := now
+            LogDebug("→ Enqueued buyEggShop")
+        }
+    }
 Return
 
 
@@ -415,6 +431,100 @@ SafeClick(xRef, yRef){
 
 
 ; ========== SHOP‑PATH LABELS ==========
+
+slot1EggShopPath:
+slot3EggShopPath:
+slot5EggShopPath:
+    WinActivate, ahk_exe RobloxPlayerBeta.exe
+    Sleep, 500
+    SafeClick(1250, 141)
+    Sleep, 500
+    Send, {d down}
+    Sleep, 18000
+    Send, {d up}
+    Sleep, 500
+    Send, {i down}
+    Sleep, 100
+    Send, {i up}
+    Sleep, 500
+    Send, {e}
+    Sleep, 200
+    SafeClick(900,680)
+    Sleep, 300
+    SafeClick(1305,365)
+    Sleep, 200
+    Send, {s down}
+    Sleep, 180
+    Send, {s up}
+    Sleep, 500
+    Send, {e}
+    Sleep, 200
+    SafeClick(900,680)
+    Sleep, 300
+    SafeClick(1305,365)
+    Sleep, 200
+    Send, {w down}
+    Sleep, 380
+    Send, {w up}
+    Sleep, 500
+    Send, {e}
+    Sleep, 200
+    SafeClick(900,680)
+    Sleep, 300
+    SafeClick(1305,365)
+    Sleep, 200
+    SafeClick(1000,150)
+    Sleep, 500
+    Gosub, alignment
+    Sleep, 200
+Return
+
+slot2EggShopPath:
+slot4EggShopPath:
+slot6EggShopPath:
+    WinActivate, ahk_exe RobloxPlayerBeta.exe
+    Sleep, 500
+    SafeClick(1250, 141)
+    Sleep, 500
+    Send, {a down}
+    Sleep, 18000
+    Send, {a up}
+    Sleep, 500
+    Send, {i down}
+    Sleep, 100
+    Send, {i up}
+    Sleep, 500
+    Send, {e}
+    Sleep, 200
+    SafeClick(900,680)
+    Sleep, 300
+    SafeClick(1305,365)
+    Sleep, 200
+    Send, {w down}
+    Sleep, 180
+    Send, {w up}
+    Sleep, 500
+    Send, {e}
+    Sleep, 200
+    SafeClick(900,680)
+    Sleep, 300
+    SafeClick(1305,365)
+    Sleep, 200
+    Send, {s down}
+    Sleep, 380
+    Send, {s up}
+    Sleep, 500
+    Send, {e}
+    Sleep, 200
+    SafeClick(900,680)
+    Sleep, 300
+    SafeClick(1305,365)
+    Sleep, 200
+    SafeClick(1000,150)
+    Sleep, 500
+    Gosub, alignment
+    Sleep, 200
+Return
 
 
 seedShopPath:
@@ -944,6 +1054,7 @@ SaveSettings:
     ; — now write them out —
     IniWrite, %slotChoice%,   %settingsFile%, Main, SlotChoice
     IniWrite, %Collecting%,   %settingsFile%, Main, Collecting
+    IniWrite, % (EggBuyAll ? 1 : 0), %settingsFile%, Egg, BuyAll
 
 
     Loop, % gearItems.Length()
@@ -954,7 +1065,6 @@ SaveSettings:
 Return
 
 ; ─── temp 
-/*
 F4::
     actionQueue.Push("seedShopPath")
     actionQueue.Push("slot" slotChoice "GearShopPath")
@@ -964,7 +1074,6 @@ F3::
     ; actionQueue.Push("sell")
     actionQueue.Push("slot" slotChoice "EggShopPath")
 Return
-*/
 
 ; ─── common STOP/RELOAD routine ───────────────────────────────────────────────
 
@@ -982,12 +1091,6 @@ StopMacro(terminate := 1) {
     if (terminate)
         ExitApp
 }
-
-BuyPremium:
-    MsgBox, 64, Premium Upgrade Grow A Garden Macro v1.5, You are about to be sent to a Roblox window where there will be a Roblox Gamepass. If you buy the Gamepass, make sure to DM me on Discord @virageroblox with your Roblox username to receive the upgraded version of the macro!`nClick OK to continue.
-    Run, https://www.roblox.com/game-pass/1197306369/Premium-Grow-a-Garden-Macro-v1-5
-Return
-
 
 
 ; ─── hook window close [×] and Esc key ────────────────────────────────────────
