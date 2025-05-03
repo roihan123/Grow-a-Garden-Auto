@@ -533,7 +533,7 @@ seedShopPath:
     SafeClick(675, 130)
     Sleep, 500
     Send {e}
-    Sleep, 1500
+    Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
     Send, {WheelUp 40}
@@ -568,7 +568,7 @@ slot5GearShopPath:
     SafeClick(1100, 500)
     Sleep, 200
     SafeClick(1050, 510)
-    Sleep, 1500
+    Sleep, 2200
     SafeClick(1305, 351)
     Sleep, 300
     Send, {WheelUp 40}
@@ -603,7 +603,7 @@ slot6GearShopPath:
     SafeClick(1100, 500)
     Sleep, 200
     SafeClick(1050, 510)
-    Sleep, 1500
+    Sleep, 2200
     SafeClick(1305, 351)
     Sleep, 300
     Send, {WheelUp 40}
