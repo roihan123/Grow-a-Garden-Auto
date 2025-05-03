@@ -562,13 +562,13 @@ slot5GearShopPath:
     Send, {d up}
     Sleep, 300
     Send {e}
-    Sleep, 500
+    Sleep, 1500
     SafeClick(1100, 450)
     Sleep, 200
     SafeClick(1100, 500)
     Sleep, 200
     SafeClick(1050, 510)
-    Sleep, 2200
+    Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
     Send, {WheelUp 40}
@@ -597,13 +597,13 @@ slot6GearShopPath:
     Send, {a up}
     Sleep, 300
     Send {e}
-    Sleep, 500
+    Sleep, 1500
     SafeClick(1100, 450)
     Sleep, 200
     SafeClick(1100, 500)
     Sleep, 200
     SafeClick(1050, 510)
-    Sleep, 2200
+    Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
     Send, {WheelUp 40}
