@@ -208,8 +208,10 @@ if WinExist("Roblox")
     if (!started) {
         started    := true
 
+/*
         ; ← start background OCR every 300ms
         SetTimer, ScanForNotifications, 300
+*/
 
         LogDebug("Macro started")
         Gosub, collecting
@@ -454,7 +456,7 @@ slot5EggShopPath:
     SafeClick(1305,365)
     Sleep, 200
     Send, {s down}
-    Sleep, 180
+    Sleep, 220
     Send, {s up}
     Sleep, 500
     Send, {e}
@@ -464,7 +466,7 @@ slot5EggShopPath:
     SafeClick(1305,365)
     Sleep, 200
     Send, {w down}
-    Sleep, 380
+    Sleep, 450
     Send, {w up}
     Sleep, 500
     Send, {e}
@@ -501,7 +503,7 @@ slot6EggShopPath:
     SafeClick(1305,365)
     Sleep, 200
     Send, {w down}
-    Sleep, 180
+    Sleep, 220
     Send, {w up}
     Sleep, 500
     Send, {e}
@@ -511,7 +513,7 @@ slot6EggShopPath:
     SafeClick(1305,365)
     Sleep, 200
     Send, {s down}
-    Sleep, 380
+    Sleep, 450
     Send, {s up}
     Sleep, 500
     Send, {e}
@@ -558,7 +560,7 @@ slot5GearShopPath:
     SafeClick(675, 130)
     Sleep, 500
     Send, {d down}
-    Sleep, 18000
+    Sleep, 16400
     Send, {d up}
     Sleep, 300
     Send {e}
@@ -593,7 +595,7 @@ slot6GearShopPath:
     SafeClick(675, 130)
     Sleep, 500
     Send, {a down}
-    Sleep, 18000
+    Sleep, 16400
     Send, {a up}
     Sleep, 300
     Send {e}
