@@ -10,9 +10,8 @@ A macro for the Roblox game "Grow a Garden"
  - You can now run dolphSol through the Main.ahk file in the folder
 
 ## Features
-dolphSol has a couple of different features it is capable of. These include:
+Virage Grow A Garden Macro has a couple of different features it is capable of. These include:
  - Automatic Buying From all Shops, with the options to check the items you want the macro to purchase
  - Automatic Crops Collecting and Selling, so you can afk and get Sheckles
- - Setting for the VIP gamepass to compensate for the increased WalkSpeed
 
- Discord Server: [https://discord.gg/DYUqwJchuV]
+ Discord Server: [https://discord.com/invite/BPPSAG8MN5]
