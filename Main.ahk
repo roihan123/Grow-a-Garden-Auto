@@ -1,11 +1,4 @@
-; Virage Grow a Garden Macro v1.5
-;   A macro for Grow a Garden on Roblox
-;   GNU General Public License
-;   Free for anyone to use
-;   Modifications are welcome, however stealing credit is not >:(
-;   Hope you enjoy! - Virage
-;   Project started on 19/04/2025
-
+; Virage Grow a Garden Macro [LUNAR GLOW UPDATE]
 #SingleInstance, Force
 #NoEnv
 SetWorkingDir %A_ScriptDir%
@@ -14,57 +7,44 @@ SetMouseDelay, -1
 SetWinDelay, -1
 SetControlDelay, -1
 SetBatchLines, -1   
+
 settingsFile := A_ScriptDir "\settings.ini"
 
+IniRead, userName, %settingsFile%, Main, RobloxUser, UnknownPlayer
 
-ScaleX(refX) {
-    return Round(refX * A_ScreenWidth / 1920)
+global webhookURL := "https://discord.com/api/webhooks/1193614908139503616/erD8p_BAoCkL4_6jxLToZU73hIAZt67QJERK_ZUwylr9svPACUj0FWEDWVfKpN6klVBu"
+
+SendWebhook(msg) {
+    global webhookURL
+    FormatTime, timestamp,, yyyy-MM-dd HH:mm:ss
+    json := "{""content"":""[" timestamp "] " msg """}"
+
+    try {
+        http := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+        http.Open("POST", webhookURL, false)
+        http.SetRequestHeader("Content-Type", "application/json")
+        http.Send(json)
+    } 
 }
 
-ScaleY(refY) {
-    return Round(refY * A_ScreenHeight / 1080)
-}
-
-ScaleRegion(refX, refY, refW, refH) {
-    x := ScaleX(refX)
-    y := ScaleY(refY)
-    w := Round(refW * A_ScreenWidth  / 1920)
-    h := Round(refH * A_ScreenHeight / 1080)
-    return [ x, y, w, h ]
-}
+global gearAutoActive := false
+global eggAutoActive  := false
 
 
-global lastNotificationTime := { backpack: 0
-                              , gear:      0
-                              , egg:       0}
-global debounceMs := 200000
-
-
-; === task queue for sell / buy routines ===
 global actionQueue := []
 
-; ======== Debugging Setup ========
-global debugMode := false       ; Set to true to enable debug logging
-global currentSection := ""    ; Tracks current section for error context
 
-LogDebug(msg) {
-    global debugMode
-    if (!debugMode)
-        return
-    FormatTime, timestamp, %A_Now%, yyyy-MM-dd HH:mm:ss
-    FileAppend, %timestamp% - %msg%`n, *MacroDebugLog.txt
-}
 
-LogDebug("Script launched")
 
 ; ======== Global Data & Defaults ========
-seedItems   := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange Tulip"
-               , "Tomato Seed", "Corn Seed", "Daffodil Seed", "Watermelon Seed"
-               , "Pumpkin Seed", "Apple Seed", "Bamboo Seed", "Coconut Seed"
-               , "Cactus Seed", "Dragon Fruit Seed", "Mango Seed", "Grape Seed"          ,"Mushroom Seed", "Pepper Seed"]
+seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange Tulip"
+             , "Tomato Seed", "Corn Seed", "Daffodil Seed", "Watermelon Seed"
+             , "Pumpkin Seed", "Apple Seed", "Bamboo Seed", "Coconut Seed"
+             , "Cactus Seed", "Dragon Fruit Seed", "Mango Seed", "Grape Seed"
+             , "Mushroom Seed", "Pepper Seed", "Cacao Seed"] ;
 
-gearItems   := ["Watering Can", "Trowel", "Basic Sprinkler", "Advanced Sprinkler"
-               , "Godly Sprinkler", "Lightning Rod", "Master Sprinkler"]
+gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler"
+             , "Godly Sprinkler", "Lightning Rod", "Master Sprinkler", "Favorite Tool"]
 
 slotChoice             := 1
 
@@ -73,76 +53,39 @@ started    := false
 
 Gosub, ShowGui
 
-; ========== GUI MENU ==========
 ShowGui:
-       Gui, Destroy
-    IniRead, slotChoice, %settingsFile%, Main, SlotChoice, 1
-    IniRead, col,        %settingsFile%, Main, Collecting, 1
+    Gui, Destroy
+    Gui, +Resize +MinimizeBox +SysMenu
+    Gui, Margin, 10, 10
+    Gui, Color, 0x202020
+    Gui, Font, s10 cWhite, Segoe UI
 
-    Gui, +OwnDialogs
-    Gui, Font, s10 Bold, Segoe UI
-    Gui, Add, StatusBar
-    Gui, Add, Tab2, x5 y10 w580 h620 vActiveTab, Garden|Shopping
-
-    ; — Garden Tab —
-    Gui, Tab, Garden
-    Gui, Font, s9, Segoe UI
-    Gui, Add, GroupBox, x20 y40 w540 h90, Garden Slot Selection
-
-    ; build 6 slot‑radios in two rows of three
-    Loop, 6 {
-        if (A_Index <= 3) {
-            x := (A_Index-1)*100 + 40
-            y := 70
-        } else {
-            x := (A_Index-4)*100 + 40
-            y := 100
-        }
-        opts := "x" x " y" y " vSlot" A_Index
-        if (A_Index = 1)
-            opts .= " Group"               ; start the group
-        if (slotChoice = A_Index)
-            opts .= " Checked"             ; restore saved choice
-        Gui, Add, Radio, %opts%, Slot %A_Index%
-    }
-
-
-
-    ; — Collect on/off —
-    Gui, Add, GroupBox, x20 y150 w540 h60, Collect Crops Around Your Garden
-    opts := "x40 y175 vCollectingEnable Group" . (col=1 ? " Checked" : "")
-    Gui, Add, Radio, %opts%, Enable
-    opts := "x140 y175 vCollectingDisable" . (col=0 ? " Checked" : "")
-    Gui, Add, Radio, %opts%, Disable
-
-    ; Shopping Tab
-    Gui, Tab, Shopping
-    Gui, Font, s9, Segoe UI
-    Gui, Add, GroupBox, x20 y50  w260 h260, Gear Shop Items
+    Gui, Font, s9 cWhite, Segoe UI
+    Gui, Add, GroupBox, x20 y50 w260 h260 cWhite, Gear Shop Items
     Loop, % gearItems.Length() {
         IniRead, gVal, %settingsFile%, Gear, Item%A_Index%, 0
         y := 70 + (A_Index - 1) * 25
-        Gui, Add, Checkbox, % "x40 y" y " vGearItem" A_Index " " . (gVal ? "Checked" : "") , % gearItems[A_Index]
+        Gui, Add, Checkbox, % "x40 y" y " vGearItem" A_Index " cWhite " . (gVal ? "Checked" : ""), % gearItems[A_Index]
     }
 
-Gui, Add, GroupBox, x300 y50 w260 h260, [NEW!] Egg Shop
-IniRead, EggBuyAll, %settingsFile%, Egg, BuyAll, 0
-Gui, Add, Checkbox, % "x320 y70 vEggBuyAll" . (EggBuyAll ? " Checked" : ""), Buy All Eggs
+    Gui, Add, GroupBox, x300 y50 w260 h260 cWhite, Egg Shop
+    IniRead, EggBuyAll, %settingsFile%, Egg, BuyAll, 0
+    Gui, Add, Checkbox, % "x320 y70 vEggBuyAll cWhite " . (EggBuyAll ? "Checked" : ""), Buy All Eggs
 
-
-    Gui, Add, GroupBox, x20 y350 w540 h260, Seed Shop Items
+    Gui, Add, GroupBox, x20 y330 w560 h300 cWhite, Seed Shop Items
     Loop, % seedItems.Length() {
         IniRead, sVal, %settingsFile%, Seed, Item%A_Index%, 0
         col := (A_Index > 9 ? 300 : 40)
         idx := (A_Index > 9 ? A_Index-9 : A_Index)
-        y := 370 + (idx - 1) * 25
-        Gui, Add, Checkbox, % "x" col " y" y " vSeedItem" A_Index " " . (sVal ? "Checked" : "") , % seedItems[A_Index]
+        y := 350 + (idx - 1) * 25
+        Gui, Add, Checkbox, % "x" col " y" y " vSeedItem" A_Index " cWhite " . (sVal ? "Checked" : ""), % seedItems[A_Index]
     }
+        Gui, Tab
+    Gui, Font, s10 cWhite Bold, Segoe UI
+    Gui, Add, Button, x50 y645 w200 h40 gStartScan Background202020, Start Macro (F5)
+    Gui, Add, Button, x350 y645 w200 h40 gQuit Background202020, Exit Macro (F7)
 
-    Gui, Tab
-    Gui, Add, Button, x50 y645 w200 h40 gStartScan, Start Macro (F5)
-    Gui, Add, Button, x350 y645 w200 h40 gQuit, Exit Macro (F7)
-    Gui, Show, w600 h720, Virage Grow a Garden Macro v1.5
+    Gui, Show, w620 h740, Virage Grow a Garden Macro [LUNAR GLOW UPDATE]
 Return
 
 ; ========== ITEM SELECTION ==========
@@ -176,10 +119,10 @@ GetSelectedItems() {
     return result
 }
 
-
 ; ========== MAIN ENTRY ==========
 StartScan:
     currentSection := "StartScan"
+    started    := true
 
 if WinExist("Roblox")
     {
@@ -187,184 +130,105 @@ if WinExist("Roblox")
         WinWaitActive, , , 2  ; wait up to 2s for it to become active
     }
     Gui, Submit, NoHide
-    Loop, 6 {
-        if (Slot%A_Index%)
-            slotChoice := A_Index
-    }
-    ; Get the collecting status from the correct radio button
-    Collecting := CollectingEnable ? 1 : 0
+
     
-    LogDebug("StartScan: slotChoice=" slotChoice)
     Gosub, UpdateSelectedItems
     itemsText := GetSelectedItems()
-    LogDebug("Items → " itemsText)
 
-    ToolTip, % "Starting macro on Slot #" slotChoice "`n`n" itemsText
+    ToolTip, Starting macro
 
     Sleep, 500
     Gosub, alignment
-    ToolTip
+    Gosub, equipRecallWrench
+    ToolTip 
 
-    if (!started) {
-        started    := true
-
-
-        ; ← start background OCR every 300ms
-        SetTimer, ScanForNotifications, 300
-
-
-        LogDebug("Macro started")
-        Gosub, collecting
-        LogDebug("Returned to StartScan from collecting")
-    } 
-Return
-
-; ========== MORE ==========
-
-alignment:
-    Sleep, 200
-    Send, {i down}
-    Sleep, 800
-    Send, {i up}
-    Sleep, 200
-    Send, {o down}
-    Sleep, 180
-    Send, {o up}
-    Sleep, 200
-Return
-
-; ========== SELL ROUTINE ==========
-sell:
-    currentSection := "sell"
-    LogDebug("sell routine started")
-    Sleep, 1000
-    SafeClick(986, 546)
-    Sleep, 1000
-    SafeClick(966, 534)
-    Sleep, 2000
-    SafeClick(1252, 143)
-    Sleep, 1000
-    SafeClick(1250, 141)
-    Sleep, 2000
-    Send {e}
-    Sleep, 2700
-    SafeClick(1100, 450)
     Sleep, 500
-    SafeClick(1100, 500)
-    Sleep, 500
-    SafeClick(1050, 510)
-    Sleep, 2500
-    SafeClick(951, 152)
-    Sleep, 500
-    SafeClick(945, 151)
-    Sleep, 2000
-    LogDebug("sell routine complete")
+
+        actionQueue.Push("buyGearSeed")
+        gearAutoActive := true
+        SetTimer, AutoBuyGearSeed, 300000  
+
+        actionQueue.Push("buyEggShop")
+        eggAutoActive := true
+        SetTimer, AutoBuyEggShop, 1800000 
+
+
+
+    while (started) {
+        if ( actionQueue.Length() ) {
+            ToolTip  
+            next := actionQueue.RemoveAt(1)
+            Gosub, % next
+            Sleep, 500
+        } else {
+            ToolTip, Waiting... 
+            Sleep, 500
+        }
+    }
 Return
 
 ; ========== BUY ROUTINES ==========
 
 buyGearSeed:
     currentSection := "buyGearSeed"
-    LogDebug("buyGearSeed entered")
-
-    ; — suspend OCR so it can't interrupt our clicks —
-    SetTimer, ScanForNotifications, Off
-
     if (selectedSeedItems.Length())
         Gosub, seedShopPath
     if (selectedGearItems.Length())
-        Gosub, % "slot" slotChoice "GearShopPath"
-
-    ; — restore OCR timer when done —
-    SetTimer, ScanForNotifications, On
-
-    LogDebug("buyGearSeed complete")
+        Gosub, gearShopPath
 Return
 
 buyEggShop:
     currentSection := "buyEggShop"
-    LogDebug("buyEggShop entered")
-
-    ; — suspend OCR so it can't interrupt our clicks —
-    SetTimer, ScanForNotifications, Off
-
 if (EggBuyAll) {
-    Gosub, % "slot" slotChoice "EggShopPath"
+    Gosub, EggShopPath
 } 
-
-        
-    ; — restore OCR timer when done —
-    SetTimer, ScanForNotifications, On
-
-    LogDebug("buyEggShop complete")
 Return
 
-
-; ========== COLLECTING LOOP ==========
-collecting:
-    currentSection := "collecting"
-    LogDebug("collecting loop entered")
-
-    while ( started ) {
-    if ( Collecting == 1 ) {
-        Gosub, Pattern1
-
-    }
-    while ( actionQueue.Length() ) {
-        next := actionQueue.RemoveAt(1)
-        LogDebug("Dequeued action → " next)
-        Gosub, % next
-        Sleep, 500
-    }
-
-
-
-        Sleep, 200
-    }
-
-    LogDebug("Exiting collecting loop")
+AutoBuyGearSeed:
+    actionQueue.Push("buyGearSeed")
 Return
 
+AutoBuyEggShop:
+    actionQueue.Push("buyEggShop")
+Return
 
-Pattern1:
-    currentSection := "Pattern1"
-    LogDebug("Starting Pattern1")
-
-    Sleep, 500
-    Send, {e Down}
-    Sleep, 100
-
-    Random, sDuration, 500, 3000
-    Send, {s Down}
-    Sleep, %sDuration%
-    Send, {s Up}
-
-    Sleep, 50
-    Send, {Space Down}
-    Sleep, 50
-
-    Random, adChoice, 0, 1
-    Random, adDuration, 1500, 2000
-    key := adChoice ? "a" : "d"
-    Send, {%key% Down}
-    Sleep, %adDuration%
-    Send, {%key% Up}
-
-    Sleep, 50
-    Send, {Space Up}
-    Sleep, 50
-    Send, {e Up}
-
+alignment:
     Sleep, 200
-    Gosub, DoubleClick
-
-    LogDebug("Finished Pattern1")
+    Send, {i down}
+    Sleep, 1200
+    Send, {i up}
+    Sleep, 200
+    Send, {o down}
+    Sleep, 700
+    Send, {o up}
+    Sleep, 200
 Return
 
-
+equipRecallWrench:
+    Sleep, 200
+    SafeClick(256,53)
+    Sleep, 500
+    SafeClick(1139,662)
+    Sleep, 50
+    Send, {r}
+    Sleep, 50
+    Send, {e}
+    Sleep, 50
+    Send, {c}
+    Sleep, 50
+    Send, {a}
+    Sleep, 50
+    Send, {l}
+    Sleep, 50
+    Send, {l}
+    Sleep, 500
+SafeDrag(665, 711, 740, 1000)
+Sleep, 500
+    SafeClick(1000,500)
+    Sleep, 200
+Return
 
 DoubleClick:
-    LogDebug("DoubleClick executed")
     Sleep, 300
     SafeClick(960,130)
     Sleep, 300
@@ -372,71 +236,21 @@ DoubleClick:
     Sleep, 300
 Return
 
-ScanForNotifications:
-    currentSection := "ScanForNotifications"
-    LogDebug("ScanForNotifications start")
 
-    if (!IsFunc("OCR"))
-        Return
-
-    region := ScaleRegion(802, 240, 126, 42)
-    raw := OCR(region, "eng")
-    StringReplace, raw, raw, `r`n, %A_Space%, All
-    StringReplace, raw, raw, `n, %A_Space%, All
-    cleaned := RegExReplace(raw, "[^A-Za-z]", "")
-    StringLower, cleaned, cleaned
-    LogDebug("Clean OCR: '" cleaned "'")
-
-    now := A_TickCount
-
-    ; — backpack debounce —
-    if InStr(cleaned, "back") {
-        if (now - lastNotificationTime.backpack > debounceMs) {
-            actionQueue.Push("sell")
-            lastNotificationTime.backpack := now
-            LogDebug("→ Enqueued sell (backpack)")
-        }
-    }
-    ; — gear/seed debounce —
-    if InStr(cleaned, "shop") || InStr(cleaned, "seed") {
-        if (now - lastNotificationTime.gear > debounceMs) {
-            actionQueue.Push("buyGearSeed")
-            lastNotificationTime.gear := now
-            LogDebug("→ Enqueued buyGearSeed")
-        }
-    }
-    ; — egg shop debounce —
-    if InStr(cleaned, "egg") {
-        if (now - lastNotificationTime.egg > debounceMs) {
-            actionQueue.Push("buyEggShop")
-            lastNotificationTime.egg := now
-            LogDebug("→ Enqueued buyEggShop")
-        }
-    }
-Return
-
-
-SafeClick(xRef, yRef){
-    ;— get actual screen size —
-    screenW := A_ScreenWidth
-    screenH := A_ScreenHeight
-
-    ;— scale reference coords to real coords —
-    x := Round(xRef * screenW / 1920)
-    y := Round(yRef * screenH / 1080)
-
-    ;— click at the scaled location —
+SafeClick(x, y){
     CoordMode, Mouse, Screen
     MouseMove, x, y, 20
     MouseClick, Left, x, y
 }
 
+SafeDrag(x1, y1, x2, y2, speed:=20){
+    CoordMode, Mouse, Screen
+    MouseClickDrag, Left, x1, y1, x2, y2, speed
+}
 
-; ========== SHOP‑PATH LABELS ==========
 
-slot1EggShopPath:
-slot3EggShopPath:
-slot5EggShopPath:
+
+EggShopPath:
     WinActivate, ahk_exe RobloxPlayerBeta.exe
     Sleep, 500
     SafeClick(1250, 141)
@@ -446,11 +260,12 @@ slot5EggShopPath:
     Send, {d up}
     Sleep, 500
     Send, {i down}
-    Sleep, 100
+    Sleep, 300
     Send, {i up}
     Sleep, 500
     Send, {e}
-    Sleep, 200
+    Sleep, 500
+;1st egg
     SafeClick(900,680)
     Sleep, 300
     SafeClick(1305,365)
@@ -460,7 +275,8 @@ slot5EggShopPath:
     Send, {s up}
     Sleep, 500
     Send, {e}
-    Sleep, 200
+    Sleep, 500
+;2nd egg
     SafeClick(900,680)
     Sleep, 300
     SafeClick(1305,365)
@@ -470,64 +286,17 @@ slot5EggShopPath:
     Send, {w up}
     Sleep, 500
     Send, {e}
-    Sleep, 200
+    Sleep, 500
+;3rd egg
     SafeClick(900,680)
     Sleep, 300
     SafeClick(1305,365)
-    Sleep, 200
+    Sleep, 500
     SafeClick(1000,150)
     Sleep, 500
     Gosub, alignment
     Sleep, 200
 Return
-
-slot2EggShopPath:
-slot4EggShopPath:
-slot6EggShopPath:
-    WinActivate, ahk_exe RobloxPlayerBeta.exe
-    Sleep, 500
-    SafeClick(1250, 141)
-    Sleep, 500
-    Send, {a down}
-    Sleep, 18000
-    Send, {a up}
-    Sleep, 500
-    Send, {i down}
-    Sleep, 100
-    Send, {i up}
-    Sleep, 500
-    Send, {e}
-    Sleep, 200
-    SafeClick(900,680)
-    Sleep, 300
-    SafeClick(1305,365)
-    Sleep, 200
-    Send, {w down}
-    Sleep, 220
-    Send, {w up}
-    Sleep, 500
-    Send, {e}
-    Sleep, 200
-    SafeClick(900,680)
-    Sleep, 300
-    SafeClick(1305,365)
-    Sleep, 200
-    Send, {s down}
-    Sleep, 450
-    Send, {s up}
-    Sleep, 500
-    Send, {e}
-    Sleep, 200
-    SafeClick(900,680)
-    Sleep, 300
-    SafeClick(1305,365)
-    Sleep, 200
-    SafeClick(1000,150)
-    Sleep, 500
-    Gosub, alignment
-    Sleep, 200
-Return
-
 
 seedShopPath:
     WinActivate, ahk_exe RobloxPlayerBeta.exe
@@ -538,6 +307,9 @@ seedShopPath:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
+    Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
     for index, item in selectedSeedItems {
@@ -545,6 +317,7 @@ seedShopPath:
         Gosub, %label%
         Sleep, 300
     }
+    }
     Sleep, 500
     SafeClick(1290,260)
     Sleep, 500
@@ -552,17 +325,14 @@ seedShopPath:
     Sleep, 500
 Return
 
-slot1GearShopPath:
-slot3GearShopPath:
-slot5GearShopPath:
+
+gearShopPath:
     WinActivate, ahk_exe RobloxPlayerBeta.exe
     Sleep, 500
-    SafeClick(675, 130)
+    Send {2}
     Sleep, 500
-    Send, {d down}
-    Sleep, 16400
-    Send, {d up}
-    Sleep, 300
+    SafeClick(1100, 450)
+    Sleep, 1000
     Send {e}
     Sleep, 1500
     SafeClick(1100, 450)
@@ -573,40 +343,8 @@ slot5GearShopPath:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
-    Send, {WheelUp 40}
-    Sleep, 300
-    for index, item in selectedGearItems {
-        label := StrReplace(item, " ", "")
-        Gosub, %label%
-        Sleep, 300
-    }
-    Sleep, 500
-    SafeClick(1290,260)
-    Sleep, 500
-    SafeClick(1000,150)
-    Sleep, 500
-Return
-
-slot2GearShopPath:
-slot4GearShopPath:
-slot6GearShopPath:
-    WinActivate, ahk_exe RobloxPlayerBeta.exe
-    Sleep, 500
-    SafeClick(675, 130)
-    Sleep, 500
-    Send, {a down}
-    Sleep, 16400
-    Send, {a up}
-    Sleep, 300
-    Send {e}
-    Sleep, 1500
-    SafeClick(1100, 450)
-    Sleep, 200
-    SafeClick(1100, 500)
-    Sleep, 200
-    SafeClick(1050, 510)
-    Sleep, 2000
-    SafeClick(1305, 351)
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
     Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
@@ -615,16 +353,15 @@ slot6GearShopPath:
         Gosub, %label%
         Sleep, 300
     }
+    }
     Sleep, 500
     SafeClick(1290,260)
     Sleep, 500
     SafeClick(1000,150)
     Sleep, 500
 Return
-
 
 ; ========== ITEM CALLBACKS ==========
-
 CarrotSeed:
     Sleep, 500
     SafeClick(750, 450)
@@ -896,7 +633,7 @@ MushroomSeed:
     Sleep, 500
     SafeClick(750, 820)
     Sleep, 500
-    Loop, 10
+    Loop, 25
     {
         SafeClick(750, 820)
         Sleep, 15
@@ -913,7 +650,24 @@ PepperSeed:
     Sleep, 500
     SafeClick(750, 820)
     Sleep, 500
-    Loop, 10
+    Loop, 25
+    {
+        SafeClick(750, 820)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 600)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+return
+CacaoSeed:
+    Sleep, 500
+    Send, {WheelDown 30}
+    Sleep, 500
+    SafeClick(750, 820)
+    Sleep, 500
+    Loop, 25
     {
         SafeClick(750, 820)
         Sleep, 15
@@ -954,7 +708,7 @@ Trowel:
     Send, {WheelUp 40}
     Sleep, 500
 return
-BasicSprinkler:
+RecallWrench:
     Sleep, 500
     Send, {WheelDown 3}
     Sleep, 500
@@ -971,7 +725,7 @@ BasicSprinkler:
     Send, {WheelUp 40}
     Sleep, 500
 return
-AdvancedSprinkler:
+BasicSprinkler:
     Sleep, 500
     Send, {WheelDown 3}
     Sleep, 500
@@ -988,7 +742,7 @@ AdvancedSprinkler:
     Send, {WheelUp 40}
     Sleep, 500
 return
-GodlySprinkler:
+AdvancedSprinkler:
     Sleep, 500
     Send, {WheelDown 4}
     Sleep, 500
@@ -1005,7 +759,7 @@ GodlySprinkler:
     Send, {WheelUp 40}
     Sleep, 500
 return
-LightningRod:
+GodlySprinkler:
     Sleep, 500
     Send, {WheelDown 5}
     Sleep, 500
@@ -1022,7 +776,7 @@ LightningRod:
     Send, {WheelUp 40}
     Sleep, 500
 return
-MasterSprinkler:
+LightningRod:
     Sleep, 500
     Send, {WheelDown 7}
     Sleep, 500
@@ -1030,34 +784,56 @@ MasterSprinkler:
     Sleep, 500
     Loop, 10
     {
-        SafeClick(750, 800)
+        SafeClick(750, 700)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 500)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+return
+MasterSprinkler:
+      Sleep, 500
+    Send, {WheelDown 9}
+    Sleep, 500
+    SafeClick(750, 830)
+    Sleep, 500
+    Loop, 10
+    {
+        SafeClick(750, 700)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 500)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+return
+FavoriteTool:
+    Sleep, 500
+    Send, {WheelDown 10}
+    Sleep, 500
+    SafeClick(750, 850)
+    Sleep, 600
+    Loop, 5 {
+        SafeClick(750, 500)
         Sleep, 15
     }
     Sleep, 500
     SafeClick(750, 600)
     Sleep, 500
-    Send, {WheelUp 40}
-    Sleep, 500
-return
-
+Return
 
 ; ========== HOTKEYS & INCLUDE ==========
 
 SaveSettings:
     Gui, Submit, NoHide
+IniWrite, %userName%, %settingsFile%, Main, RobloxUser
 
-    ; — update our variables from the GUI —
-    Loop, 6 {
-        if (Slot%A_Index%)
-            slotChoice := A_Index
-    }
-    Collecting := CollectingEnable ? 1 : 0
 
     ; — now write them out —
-    IniWrite, %slotChoice%,   %settingsFile%, Main, SlotChoice
-    IniWrite, %Collecting%,   %settingsFile%, Main, Collecting
     IniWrite, % (EggBuyAll ? 1 : 0), %settingsFile%, Egg, BuyAll
-
 
     Loop, % gearItems.Length()
         IniWrite, % (GearItem%A_Index% ? 1 : 0), %settingsFile%, Gear, Item%A_Index%
@@ -1070,7 +846,7 @@ Return
 /*
 F4::
     actionQueue.Push("seedShopPath")
-    actionQueue.Push("slot" slotChoice "GearShopPath")
+    actionQueue.Push("slot" slotChoice "gearShopPath")
 Return
 
 F3::
@@ -1080,18 +856,12 @@ Return
 */
 
 ; ─── common STOP/RELOAD routine ───────────────────────────────────────────────
-
 StopMacro(terminate := 1) {
-    SetTimer, ScanForNotifications, Off
+    Gui, Submit, NoHide
     Sleep, 50
     started := false
-
-    ; — first save the current GUI state —
     Gosub, SaveSettings
-
-    ; — only then destroy the GUI window —
     Gui, Destroy
-
     if (terminate)
         ExitApp
 }
@@ -1120,4 +890,3 @@ F5::Gosub, StartScan
 ; ─── ensure you still include Vis2 and other directives ─────────────────────
 #MaxThreadsPerHotkey, 2
 #Include %A_ScriptDir%\lib\Vis2.ahk
-
