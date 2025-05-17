@@ -43,8 +43,9 @@ moonItems   := ["Mysterious Crate", "Night Egg", "Night Seed Pack", "Crimson Vin
                , "Moon Melon Seed", "Star Caller", "Blood Kiwi", "Blood Hedgehog"
                , "Blood Owl"]
 
-global lastMoonTimestamp := 0
-global debounceInterval  := 20 * 60 * 1000
+global lastMoonHour := ""  
+SetTimer, PushMoonShop, 60000 
+
 
 
 ; ======== Script State Flags ========
@@ -197,35 +198,21 @@ if (idList >= 2) {
     Sleep, 500
 
         actionQueue.Push("buySeedShop")
-        seedAutoActive := true
         SetTimer, AutoBuySeed, 300000 
         actionQueue.Push("buyGearShop")
-        gearAutoActive := true
         SetTimer, AutoBuyGear, 300000  
         actionQueue.Push("buyEggShop")
-        eggAutoActive := true
         SetTimer, AutoBuyEggShop, 1800000 
 
  while (started) {
         while (actionQueue.Length()) {
+            Tooltip
             next := actionQueue.RemoveAt(1)
             Gosub, % next
-ImageSearch, x, y, 1700, 900, A_ScreenWidth, A_ScreenHeight, *n Images\test13.png
-if (ErrorLevel = 0) {
-    ; only run buyMoonShop if more than 20 min have passed since the last call
-    if (A_TickCount - lastMoonTimestamp > debounceInterval) {
-        Gosub, buyMoonShop
-        lastMoonTimestamp := A_TickCount
-    }
-}
-
             Sleep, 500
         }
+        ToolTip, Waiting for new restock
         Sleep, 500
-
-
-
-
 }
 Return
 
@@ -260,6 +247,8 @@ alignment:
     Send, {o up}
     Sleep, 200
 Return
+
+
 
 ; ========== BUY ROUTINES ==========
 
@@ -319,6 +308,15 @@ Return
 AutoBuyEggShop:
     actionQueue.Push("buyEggShop")
 Return
+
+PushMoonShop:
+    FormatTime, currHour,, HH  ; currHour = “00”–“23”
+    FormatTime, currMin,, mm   ; currMin  = “00”–“59”
+    if (currMin = "00" && currHour != lastMoonHour) {
+        actionQueue.Push("buyMoonShop")
+        lastMoonHour := currHour
+    }
+return
 
 
 SafeClick(x, y){
@@ -575,7 +573,7 @@ redMoonPath:
     Send, {w up}
     Sleep, 500
     Send, {d down}
-    Sleep, 2000
+    Sleep, 1500
     Send, {d up}
     Sleep, 500
     Send {e}
@@ -616,7 +614,7 @@ redMoonPathAll:
     Send, {w up}
     Sleep, 500
     Send, {d down}
-    Sleep, 2000
+    Sleep, 1500
     Send, {d up}
     Sleep, 500
     Send {e}
@@ -647,7 +645,7 @@ if (ErrorLevel = 0) {
     Send, {w up}
     Sleep, 500
     Send, {d down}
-    Sleep, 2000
+    Sleep, 1500
     Send, {d up}
     Sleep, 500
     Send {e}
@@ -1319,7 +1317,7 @@ CacaoSeed:
     Sleep, 500
     Send, {WheelDown 30}
     Sleep, 500
-    SafeClick(750, 820)
+    SafeClick(750, 500)
     Sleep, 500
     Loop, 30
     {
@@ -1331,9 +1329,10 @@ CacaoSeed:
     Sleep, 500
     Send, {WheelUp 40}
     Sleep, 500
+return
 BeanstalkSeed:
     Sleep, 500
-    Send, {WheelDown 33}
+    Send, {WheelDown 30}
     Sleep, 500
     SafeClick(750, 820)
     Sleep, 500
@@ -1666,7 +1665,6 @@ return
 ; ─── common STOP/RELOAD routine ───────────────────────────────────────────────
 StopMacro(terminate := 1) {
     Gui, Submit, NoHide
-    ; SendWebhook("Macro stopped)
     Sleep, 50
     started := false
     Gosub, SaveSettings
