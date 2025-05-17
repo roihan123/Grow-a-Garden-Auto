@@ -1,4 +1,5 @@
-; Virage Grow a Garden Macro [LUNAR GLOW UPDATE]
+; Virage Grow a Garden Macro [BLOOD MOON UPDATE]
+
 #SingleInstance, Force
 #NoEnv
 SetWorkingDir %A_ScriptDir%
@@ -6,11 +7,13 @@ SetWorkingDir %A_ScriptDir%
 SetMouseDelay, -1 
 SetWinDelay, -1
 SetControlDelay, -1
-SetBatchLines, -1   
+SetBatchLines, -1
+
+   
 
 settingsFile := A_ScriptDir "\settings.ini"
 
-IniRead, userName, %settingsFile%, Main, RobloxUser, UnknownPlayer
+
 
 global webhookURL := "https://discord.com/api/webhooks/1193614908139503616/erD8p_BAoCkL4_6jxLToZU73hIAZt67QJERK_ZUwylr9svPACUj0FWEDWVfKpN6klVBu"
 
@@ -27,26 +30,22 @@ SendWebhook(msg) {
     } 
 }
 
-global gearAutoActive := false
-global eggAutoActive  := false
-
-
-global actionQueue := []
-
-
-
-
 ; ======== Global Data & Defaults ========
-seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange Tulip"
-             , "Tomato Seed", "Corn Seed", "Daffodil Seed", "Watermelon Seed"
-             , "Pumpkin Seed", "Apple Seed", "Bamboo Seed", "Coconut Seed"
-             , "Cactus Seed", "Dragon Fruit Seed", "Mango Seed", "Grape Seed"
-             , "Mushroom Seed", "Pepper Seed", "Cacao Seed"] ;
+seedItems   := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange Tulip"
+               , "Tomato Seed", "Corn Seed", "Daffodil Seed", "Watermelon Seed"
+               , "Pumpkin Seed", "Apple Seed", "Bamboo Seed", "Coconut Seed"
+               , "Cactus Seed", "Dragon Fruit Seed", "Mango Seed", "Grape Seed"          ,"Mushroom Seed", "Pepper Seed", "Cacao Seed", "BeanstalkSeed"]
 
-gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler"
-             , "Godly Sprinkler", "Lightning Rod", "Master Sprinkler", "Favorite Tool"]
+gearItems   := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler"
+               , "Godly Sprinkler", "Lightning Rod", "Master Sprinkler"]
 
-slotChoice             := 1
+moonItems   := ["Mysterious Crate", "Night Egg", "Night Seed Pack", "Crimson Vine Seed"
+               , "Moon Melon Seed", "Star Caller", "Blood Kiwi", "Blood Hedgehog"
+               , "Blood Owl"]
+
+global lastMoonTimestamp := 0
+global debounceInterval  := 20 * 60 * 1000
+
 
 ; ======== Script State Flags ========
 started    := false
@@ -60,33 +59,60 @@ ShowGui:
     Gui, Color, 0x202020
     Gui, Font, s10 cWhite, Segoe UI
 
-    Gui, Font, s9 cWhite, Segoe UI
-    Gui, Add, GroupBox, x20 y50 w260 h260 cWhite, Gear Shop Items
-    Loop, % gearItems.Length() {
-        IniRead, gVal, %settingsFile%, Gear, Item%A_Index%, 0
-        y := 70 + (A_Index - 1) * 25
-        Gui, Add, Checkbox, % "x40 y" y " vGearItem" A_Index " cWhite " . (gVal ? "Checked" : ""), % gearItems[A_Index]
-    }
+; ======== Gear Shop Items ========
+Gui, Font, s9 cWhite, Segoe UI
+Gui, Add, GroupBox, x20 y50 w260 h300 cWhite, Gear Shop Items
+IniRead, GearBuyAll, %settingsFile%, Gear, BuyAll, 0
+options := "x40 y70 vGearBuyAll cWhite " . (GearBuyAll ? "Checked" : "")
+Gui, Add, Checkbox, %options%, Buy All Gear
+Loop, % gearItems.Length() {
+    IniRead, gVal, %settingsFile%, Gear, Item%A_Index%, 0
+    y := 100 + (A_Index - 1) * 25
+    options := "x40 y" y " vGearItem" A_Index " cWhite " . (gVal ? "Checked" : "")
+    Gui, Add, Checkbox, %options%, % gearItems[A_Index]
+}
 
-    Gui, Add, GroupBox, x300 y50 w260 h260 cWhite, Egg Shop
-    IniRead, EggBuyAll, %settingsFile%, Egg, BuyAll, 0
-    Gui, Add, Checkbox, % "x320 y70 vEggBuyAll cWhite " . (EggBuyAll ? "Checked" : ""), Buy All Eggs
+; ======== Egg Shop Items ========
+Gui, Add, GroupBox, x300 y50 w260 h260 cWhite, Egg Shop
+IniRead, EggBuyAll, %settingsFile%, Egg, BuyAll, 0
+options := "x320 y70 vEggBuyAll cWhite " . (EggBuyAll ? "Checked" : "")
+Gui, Add, Checkbox, %options%, Buy All Eggs
 
-    Gui, Add, GroupBox, x20 y330 w560 h300 cWhite, Seed Shop Items
-    Loop, % seedItems.Length() {
-        IniRead, sVal, %settingsFile%, Seed, Item%A_Index%, 0
-        col := (A_Index > 9 ? 300 : 40)
-        idx := (A_Index > 9 ? A_Index-9 : A_Index)
-        y := 350 + (idx - 1) * 25
-        Gui, Add, Checkbox, % "x" col " y" y " vSeedItem" A_Index " cWhite " . (sVal ? "Checked" : ""), % seedItems[A_Index]
-    }
-        Gui, Tab
-    Gui, Font, s10 cWhite Bold, Segoe UI
-    Gui, Add, Button, x50 y645 w200 h40 gStartScan Background202020, Start Macro (F5)
-    Gui, Add, Button, x350 y645 w200 h40 gQuit Background202020, Exit Macro (F7)
+; ======== Seed Shop Items ========
+Gui, Add, GroupBox, x20 y370 w560 h330 cWhite, Seed Shop Items
+IniRead, SeedBuyAll, %settingsFile%, Seed, BuyAll, 0
+options := "x40 y390 vSeedBuyAll cWhite " . (SeedBuyAll ? "Checked" : "")
+Gui, Add, Checkbox, %options%, Buy All Seeds
+Loop, % seedItems.Length() {
+    IniRead, sVal, %settingsFile%, Seed, Item%A_Index%, 0
+    col := (A_Index > 10 ? 300 : 40)
+    idx := (A_Index > 10 ? A_Index-10 : A_Index)
+    y := 420 + (idx - 1) * 25
+    options := "x" col " y" y " vSeedItem" A_Index " cWhite " . (sVal ? "Checked" : "")
+    Gui, Add, Checkbox, %options%, % seedItems[A_Index]
+}
 
-    Gui, Show, w620 h740, Virage Grow a Garden Macro [LUNAR GLOW UPDATE]
-Return
+; ======== Moon Shop Items ========
+Gui, Add, GroupBox, x20 y730 w560 h200 cWhite, Moon Shop Items
+IniRead, MoonBuyAll, %settingsFile%, Moon, BuyAll, 0
+options := "x40 y750 vMoonBuyAll cWhite " . (MoonBuyAll ? "Checked" : "")
+Gui, Add, Checkbox, %options%, Buy All Moon Items
+Loop, % moonItems.Length() {
+    IniRead, mVal, %settingsFile%, Moon, Item%A_Index%, 0
+    col := (A_Index > 5 ? 300 : 40)
+    idx := (A_Index > 5 ? A_Index-5 : A_Index)
+    y := 780 + (idx - 1) * 25
+    options := "x" col " y" y " vMoonItem" A_Index " cWhite " . (mVal ? "Checked" : "")
+    Gui, Add, Checkbox, %options%, % moonItems[A_Index]
+}
+
+; ======== Action Buttons ========
+Gui, Font, s10 cWhite Bold, Segoe UI
+Gui, Add, Button, x50 y950 w200 h40 gStartScan Background202020, Start Macro (F5)
+Gui, Add, Button, x350 y950 w200 h40 gQuit Background202020, Exit Macro (F7)
+
+; Show full window
+Gui, Show, w620 h1020, Virage Grow a Garden Macro [BLOOD MOON UPDATE]
 
 ; ========== ITEM SELECTION ==========
 UpdateSelectedItems:
@@ -101,6 +127,13 @@ UpdateSelectedItems:
         if (GearItem%A_Index%)
             selectedGearItems.Push(gearItems[A_Index])
     }
+    selectedMoonItems := []
+    Loop, % moonItems.Length() {
+        if (MoonItem%A_Index%)
+            selectedMoonItems.Push(moonItems[A_Index])
+    }
+
+
 Return
 
 
@@ -116,13 +149,21 @@ GetSelectedItems() {
         for _, name in selectedGearItems
             result .= "  - " name "`n"
     }
+    if (selectedMoonItems.Length()) {
+        result .= "Moon Items:`n"
+        for _, name in selectedMoonItems
+            result .= "  - " name "`n"
+    }
     return result
 }
 
+
 ; ========== MAIN ENTRY ==========
 StartScan:
-    currentSection := "StartScan"
     started    := true
+
+altIDs := []    
+actionQueue := []
 
 if WinExist("Roblox")
     {
@@ -131,68 +172,84 @@ if WinExist("Roblox")
     }
     Gui, Submit, NoHide
 
-    
+WinGet, idList, List, ahk_exe RobloxPlayerBeta.exe
+if (idList >= 1) {
+    mainID := idList1
+}
+if (idList >= 2) {
+    Loop, % idList {
+        if (A_Index = 1)
+            continue
+        altIDs.Push(idList%A_Index%)
+    }
+}
+
     Gosub, UpdateSelectedItems
     itemsText := GetSelectedItems()
 
     ToolTip, Starting macro
 
     Sleep, 500
+
     Gosub, alignment
-    Gosub, equipRecallWrench
     ToolTip 
 
     Sleep, 500
 
-        actionQueue.Push("buyGearSeed")
+        actionQueue.Push("buySeedShop")
+        seedAutoActive := true
+        SetTimer, AutoBuySeed, 300000 
+        actionQueue.Push("buyGearShop")
         gearAutoActive := true
-        SetTimer, AutoBuyGearSeed, 300000  
-
+        SetTimer, AutoBuyGear, 300000  
         actionQueue.Push("buyEggShop")
         eggAutoActive := true
         SetTimer, AutoBuyEggShop, 1800000 
 
-
-
-    while (started) {
-        if ( actionQueue.Length() ) {
-            ToolTip  
+ while (started) {
+        while (actionQueue.Length()) {
             next := actionQueue.RemoveAt(1)
             Gosub, % next
-            Sleep, 500
-        } else {
-            ToolTip, Waiting... 
+ImageSearch, x, y, 1700, 900, A_ScreenWidth, A_ScreenHeight, *n Images\test13.png
+if (ErrorLevel = 0) {
+    ; only run buyMoonShop if more than 20 min have passed since the last call
+    if (A_TickCount - lastMoonTimestamp > debounceInterval) {
+        Gosub, buyMoonShop
+        lastMoonTimestamp := A_TickCount
+    }
+}
+
             Sleep, 500
         }
-    }
+        Sleep, 500
+
+
+
+
+}
 Return
 
-; ========== BUY ROUTINES ==========
-
-buyGearSeed:
-    currentSection := "buyGearSeed"
-    if (selectedSeedItems.Length())
-        Gosub, seedShopPath
-    if (selectedGearItems.Length())
-        Gosub, gearShopPath
-Return
-
-buyEggShop:
-    currentSection := "buyEggShop"
-if (EggBuyAll) {
-    Gosub, EggShopPath
-} 
-Return
-
-AutoBuyGearSeed:
-    actionQueue.Push("buyGearSeed")
-Return
-
-AutoBuyEggShop:
-    actionQueue.Push("buyEggShop")
-Return
+; ========== MORE ==========
 
 alignment:
+ global mainID, altIDs
+
+    for index, winID in altIDs {
+        WinActivate % "ahk_id " winID
+        WinWaitActive, ahk_id %winID%,, 2
+    Sleep, 200
+    Send, {i down}
+    Sleep, 1200
+    Send, {i up}
+    Sleep, 200
+    Send, {o down}
+    Sleep, 700
+    Send, {o up}
+    Sleep, 200
+    }
+
+
+    WinActivate % "ahk_id " mainID
     Sleep, 200
     Send, {i down}
     Sleep, 1200
@@ -204,29 +261,44 @@ alignment:
     Sleep, 200
 Return
 
-equipRecallWrench:
-    Sleep, 200
-    SafeClick(256,53)
-    Sleep, 500
-    SafeClick(1139,662)
-    Sleep, 50
-    Send, {r}
-    Sleep, 50
-    Send, {e}
-    Sleep, 50
-    Send, {c}
-    Sleep, 50
-    Send, {a}
-    Sleep, 50
-    Send, {l}
-    Sleep, 50
-    Send, {l}
-    Sleep, 500
-SafeDrag(665, 711, 740, 1000)
-Sleep, 500
-    SafeClick(1000,500)
-    Sleep, 200
+; ========== BUY ROUTINES ==========
+
+buySeedShop:
+    if (SeedBuyAll) {
+        Gosub, seedShopPathAll
+        Return  
+    }
+    if (selectedSeedItems.Length())
+        Gosub, seedShopPath
 Return
+
+buyGearShop:
+    if (GearBuyAll) {
+        Gosub, gearShopPathAll
+        Return
+    }
+    if (selectedGearItems.Length())
+        Gosub, gearShopPath
+Return
+
+buyMoonShop:
+    if (MoonBuyAll) {
+        Gosub, redMoonPathAll
+        Return
+    }
+    if (selectedmoonItems.Length())
+        Gosub, redMoonPath
+Return
+
+buyEggShop:
+if (EggBuyAll) {
+    Gosub, EggShopPath
+} 
+Return
+
+
+; ========== COLLECTING LOOP ==========
+
 
 DoubleClick:
     Sleep, 300
@@ -234,6 +306,18 @@ DoubleClick:
     Sleep, 300
     SafeClick(950,140)
     Sleep, 300
+Return
+
+AutoBuySeed:
+    actionQueue.Push("buySeedShop")
+Return
+
+AutoBuyGear:
+    actionQueue.Push("buyGearShop")
+Return
+
+AutoBuyEggShop:
+    actionQueue.Push("buyEggShop")
 Return
 
 
@@ -250,6 +334,8 @@ SafeDrag(x1, y1, x2, y2, speed:=20){
 
 
 
+; ========== SHOP‑PATH LABELS ==========
+
 EggShopPath:
     WinActivate, ahk_exe RobloxPlayerBeta.exe
     Sleep, 500
@@ -264,8 +350,7 @@ EggShopPath:
     Send, {i up}
     Sleep, 500
     Send, {e}
-    Sleep, 500
-;1st egg
+    Sleep, 800
     SafeClick(900,680)
     Sleep, 300
     SafeClick(1305,365)
@@ -275,8 +360,7 @@ EggShopPath:
     Send, {s up}
     Sleep, 500
     Send, {e}
-    Sleep, 500
-;2nd egg
+    Sleep, 800
     SafeClick(900,680)
     Sleep, 300
     SafeClick(1305,365)
@@ -286,8 +370,7 @@ EggShopPath:
     Send, {w up}
     Sleep, 500
     Send, {e}
-    Sleep, 500
-;3rd egg
+    Sleep, 800
     SafeClick(900,680)
     Sleep, 300
     SafeClick(1305,365)
@@ -302,6 +385,10 @@ seedShopPath:
     WinActivate, ahk_exe RobloxPlayerBeta.exe
     Sleep, 500
     SafeClick(675, 130)
+    Sleep, 500
+    Send, {a down}
+    Sleep, 500
+    Send, {a up}
     Sleep, 500
     Send {e}
     Sleep, 2000
@@ -321,10 +408,63 @@ seedShopPath:
     Sleep, 500
     SafeClick(1290,260)
     Sleep, 500
-    SafeClick(1000,150)
-    Sleep, 500
 Return
 
+seedShopPathAll:
+ global mainID, altIDs
+
+    for index, winID in altIDs {
+        WinActivate % "ahk_id " winID
+        WinWaitActive, ahk_id %winID%,, 2
+    Sleep, 500
+    SafeClick(675, 130)
+    Sleep, 500
+    Send, {a down}
+    Sleep, 500
+    Send, {a up}
+    Sleep, 500
+    Send {e}
+    Sleep, 2000
+    SafeClick(1305, 351)
+    Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
+    Sleep, 300
+    Send, {WheelUp 40}
+    Sleep, 300
+    Gosub, BuyAllSeed
+    Sleep, 500
+    }
+    SafeClick(1290,260)
+    Sleep, 500
+    SafeClick(1000,150)
+    Sleep, 500
+    }
+
+
+    WinActivate % "ahk_id " mainID
+    Sleep, 500
+    SafeClick(675, 130)
+    Sleep, 500
+    Send, {a down}
+    Sleep, 500
+    Send, {a up}
+    Sleep, 500
+    Send {e}
+    Sleep, 2000
+    SafeClick(1305, 351)
+    Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
+    Sleep, 300
+    Send, {WheelUp 40}
+    Sleep, 300
+    Gosub, BuyAllSeed
+    Sleep, 500
+    }
+    SafeClick(1290,260)
+    Sleep, 500
+Return
 
 gearShopPath:
     WinActivate, ahk_exe RobloxPlayerBeta.exe
@@ -357,16 +497,530 @@ gearShopPath:
     Sleep, 500
     SafeClick(1290,260)
     Sleep, 500
-    SafeClick(1000,150)
+Return
+
+gearShopPathAll:
+ global mainID, altIDs
+
+    for index, winID in altIDs {
+        WinActivate % "ahk_id " winID
+        WinWaitActive, ahk_id %winID%,, 2
+    Sleep, 500
+    Send {2}
+    Sleep, 500
+    SafeClick(1100, 450)
+    Sleep, 1000
+    Send {e}
+    Sleep, 1500
+    SafeClick(1100, 450)
+    Sleep, 200
+    SafeClick(1100, 500)
+    Sleep, 200
+    SafeClick(1050, 510)
+    Sleep, 2000
+    SafeClick(1305, 351)
+    Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
+    Sleep, 300
+    Send, {WheelUp 40}
+    Sleep, 300
+    }
+    Gosub, BuyAllGear
+    Sleep, 500
+    SafeClick(1290,260)
+    Sleep, 500
+    }
+
+
+    WinActivate % "ahk_id " mainID
+    Sleep, 500
+    Send {2}
+    Sleep, 500
+    SafeClick(1100, 450)
+    Sleep, 1000
+    Send {e}
+    Sleep, 1500
+    SafeClick(1100, 450)
+    Sleep, 200
+    SafeClick(1100, 500)
+    Sleep, 200
+    SafeClick(1050, 510)
+    Sleep, 2000
+    SafeClick(1305, 351)
+    Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
+    Sleep, 300
+    Send, {WheelUp 40}
+    Sleep, 300
+    }
+    Gosub, BuyAllGear
+    Sleep, 500
+    SafeClick(1290,260)
     Sleep, 500
 Return
 
+redMoonPath:
+    WinActivate, ahk_exe RobloxPlayerBeta.exe
+    Sleep, 500
+    SafeClick(675, 130)
+    Sleep, 500
+    Send, {d down}
+    Sleep, 6000
+    Send, {d up}
+    Sleep, 500
+    Send, {w down}
+    Sleep, 800
+    Send, {w up}
+    Sleep, 500
+    Send, {d down}
+    Sleep, 2000
+    Send, {d up}
+    Sleep, 500
+    Send {e}
+    Sleep, 1500
+ImageSearch, x, y, 0, 0, A_ScreenWidth, A_ScreenHeight, *n Images\moonShop.png
+if (ErrorLevel = 0) {
+    Sleep, 300
+    SafeClick(1305, 351)
+    Sleep, 300
+    Send, {WheelUp 40}
+    Sleep, 300
+    for index, item in selectedMoonItems {
+        label := StrReplace(item, " ", "")
+        Gosub, %label%
+        Sleep, 300
+    }
+} 
+    Sleep, 500
+    SafeClick(1290,260)
+    Sleep, 500
+Return
+
+redMoonPathAll:
+ global mainID, altIDs
+
+    for index, winID in altIDs {
+        WinActivate % "ahk_id " winID
+        WinWaitActive, ahk_id %winID%,, 2
+    Sleep, 500
+    SafeClick(675, 130)
+    Sleep, 500
+    Send, {d down}
+    Sleep, 6000
+    Send, {d up}
+    Sleep, 500
+    Send, {w down}
+    Sleep, 800
+    Send, {w up}
+    Sleep, 500
+    Send, {d down}
+    Sleep, 2000
+    Send, {d up}
+    Sleep, 500
+    Send {e}
+    Sleep, 1500
+ImageSearch, x, y, 0, 0, A_ScreenWidth, A_ScreenHeight, *n Images\moonShop.png
+if (ErrorLevel = 0) {
+    Sleep, 300
+    SafeClick(1305, 351)
+    Sleep, 300
+    Send, {WheelUp 40}
+    Sleep, 300
+    Gosub, BuyAllMoon 
+}    
+    Sleep, 500
+    SafeClick(1290,260)
+    Sleep, 500
+    }
+    WinActivate % "ahk_id " mainID
+    Sleep, 500
+    SafeClick(675, 130)
+    Sleep, 500
+    Send, {d down}
+    Sleep, 6000
+    Send, {d up}
+    Sleep, 500
+    Send, {w down}
+    Sleep, 800
+    Send, {w up}
+    Sleep, 500
+    Send, {d down}
+    Sleep, 2000
+    Send, {d up}
+    Sleep, 500
+    Send {e}
+    Sleep, 1500
+ImageSearch, x, y, 0, 0, A_ScreenWidth, A_ScreenHeight, *n Images\moonShop.png
+if (ErrorLevel = 0) {
+    Sleep, 300
+    SafeClick(1305, 351)
+    Sleep, 300
+    Send, {WheelUp 40}
+    Sleep, 300
+    Gosub, BuyAllMoon  
+}   
+    Sleep, 500
+    SafeClick(1290,260)
+    Sleep, 500
+Return
+
+
 ; ========== ITEM CALLBACKS ==========
+
+buyAllSeed:
+;CarrotSeed
+    Sleep, 200
+    SafeClick(750, 450)
+    Sleep, 200
+    Loop, 30 {
+        SafeClick(750, 630)
+        Sleep, 15
+    }
+;StrawberrySeed
+    Sleep, 200
+    SafeClick(750, 750)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 640)
+        Sleep, 15
+    }
+;BlueberrySeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;OrangeTulip
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;TomatoSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;CornSeed   
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;DaffodilSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;WatermelonSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 710)
+        Sleep, 15
+    }
+;PumpkinSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 710)
+        Sleep, 15
+    }
+;AppleSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 710)
+        Sleep, 15
+    }
+;BambooSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 710)
+        Sleep, 15
+    }
+;CoconutSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 750)
+        Sleep, 15
+    }
+;CactusSeed:
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 750)
+        Sleep, 15
+    }
+;DragonFruitSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 750)
+        Sleep, 15
+    }
+;MangoSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 800)
+        Sleep, 15
+    }
+;GrapeSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 800)
+        Sleep, 15
+    }
+    Sleep, 300
+    SafeClick(700, 600)
+;MushroomSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 800)
+        Sleep, 15
+    }
+    Sleep, 300
+    SafeClick(700, 600)
+;PepperSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 800)
+        Sleep, 15
+    }
+    Sleep, 300
+    SafeClick(700, 600)
+;CacaoSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 840)
+        Sleep, 15
+    }
+    Sleep, 300
+    SafeClick(700, 600)
+;BeanstalkSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 840)
+        Sleep, 15
+    }
+return
+
+buyAllGear:
+;CarrotSeed
+    Sleep, 200
+    SafeClick(750, 450)
+    Sleep, 200
+    Loop, 30 {
+        SafeClick(750, 630)
+        Sleep, 15
+    }
+;StrawberrySeed
+    Sleep, 200
+    SafeClick(750, 750)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 640)
+        Sleep, 15
+    }
+;BlueberrySeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;OrangeTulip
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;TomatoSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;CornSeed   
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;DaffodilSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;WatermelonSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 710)
+        Sleep, 15
+    }
+return
+
+buyAllMoon:
+;CarrotSeed
+    Sleep, 200
+    SafeClick(750, 450)
+    Sleep, 200
+    Loop, 30 {
+        SafeClick(750, 630)
+        Sleep, 15
+    }
+;StrawberrySeed
+    Sleep, 200
+    SafeClick(750, 750)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 640)
+        Sleep, 15
+    }
+;BlueberrySeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;OrangeTulip
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;TomatoSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;CornSeed   
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 670)
+        Sleep, 15
+    }
+;DaffodilSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        ;SafeClick(750, 670)
+        Sleep, 15
+    }
+;WatermelonSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 710)
+        Sleep, 15
+    }
+;PumpkinSeed
+    Sleep, 200
+    SafeClick(750, 867)
+    Sleep, 200
+    Loop, 30
+    {
+        SafeClick(750, 800)
+        Sleep, 15
+    }
+return
+
 CarrotSeed:
     Sleep, 500
     SafeClick(750, 450)
     Sleep, 500
-    Loop, 25 {
+    Loop, 30 {
         SafeClick(750, 630)
         Sleep, 15
     }
@@ -378,7 +1032,7 @@ StrawberrySeed:
     Sleep, 500
     SafeClick(750, 750)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 640)
         Sleep, 15
@@ -395,7 +1049,7 @@ BlueberrySeed:
     Sleep, 500
     SafeClick(750, 500)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 650)
         Sleep, 15
@@ -412,7 +1066,7 @@ OrangeTulip:
     Sleep, 500
     SafeClick(750, 800)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 650)
         Sleep, 15
@@ -429,7 +1083,7 @@ TomatoSeed:
     Sleep, 500
     SafeClick(750, 850)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 680)
         Sleep, 15
@@ -446,7 +1100,7 @@ CornSeed:
     Sleep, 500
     SafeClick(750, 850)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 690)
         Sleep, 15
@@ -463,7 +1117,7 @@ DaffodilSeed:
     Sleep, 500
     SafeClick(750, 840)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 700)
         Sleep, 15
@@ -480,7 +1134,7 @@ WatermelonSeed:
     Sleep, 500
     SafeClick(750, 830)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 700)
         Sleep, 15
@@ -497,7 +1151,7 @@ PumpkinSeed:
     Sleep, 500
     SafeClick(750, 670)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 720)
         Sleep, 15
@@ -514,7 +1168,7 @@ AppleSeed:
     Sleep, 500
     SafeClick(750, 500)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 730)
         Sleep, 15
@@ -531,7 +1185,7 @@ BambooSeed:
     Sleep, 500
     SafeClick(750, 700)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 730)
         Sleep, 15
@@ -548,7 +1202,7 @@ CoconutSeed:
     Sleep, 500
     SafeClick(750, 800)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 750)
         Sleep, 15
@@ -565,7 +1219,7 @@ CactusSeed:
     Sleep, 500
     SafeClick(750, 800)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 750)
         Sleep, 15
@@ -582,7 +1236,7 @@ DragonFruitSeed:
     Sleep, 500
     SafeClick(750, 600)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 770)
         Sleep, 15
@@ -599,7 +1253,7 @@ MangoSeed:
     Sleep, 500
     SafeClick(750, 800)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 780)
         Sleep, 15
@@ -616,7 +1270,7 @@ GrapeSeed:
     Sleep, 500
     SafeClick(750, 600)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 800)
         Sleep, 15
@@ -633,7 +1287,7 @@ MushroomSeed:
     Sleep, 500
     SafeClick(750, 820)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 820)
         Sleep, 15
@@ -650,7 +1304,7 @@ PepperSeed:
     Sleep, 500
     SafeClick(750, 820)
     Sleep, 500
-    Loop, 25
+    Loop, 30
     {
         SafeClick(750, 820)
         Sleep, 15
@@ -667,7 +1321,23 @@ CacaoSeed:
     Sleep, 500
     SafeClick(750, 820)
     Sleep, 500
-    Loop, 25
+    Loop, 30
+    {
+        SafeClick(750, 820)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 600)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+BeanstalkSeed:
+    Sleep, 500
+    Send, {WheelDown 33}
+    Sleep, 500
+    SafeClick(750, 820)
+    Sleep, 500
+    Loop, 30
     {
         SafeClick(750, 820)
         Sleep, 15
@@ -810,54 +1480,193 @@ MasterSprinkler:
     Send, {WheelUp 40}
     Sleep, 500
 return
-FavoriteTool:
+
+MysteriousCrate:
     Sleep, 500
-    Send, {WheelDown 10}
+    SafeClick(750, 450)
     Sleep, 500
-    SafeClick(750, 850)
-    Sleep, 600
-    Loop, 5 {
-        SafeClick(750, 500)
+    Loop, 30 {
+        SafeClick(750, 630)
         Sleep, 15
     }
     Sleep, 500
-    SafeClick(750, 600)
-    Sleep, 500
+    SafeClick(750, 450)
+    Sleep, 300
 Return
+NightEgg:
+    Sleep, 500
+    SafeClick(750, 750)
+    Sleep, 500
+    Loop, 30
+    {
+        SafeClick(750, 640)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 450)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 300
+return
+NightSeedPack:
+    Sleep, 500
+    Send, {WheelDown 3}
+    Sleep, 500
+    SafeClick(750, 500)
+    Sleep, 500
+    Loop, 30
+    {
+        SafeClick(750, 650)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 500)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+return
+CrimsonVineSeed:
+    Sleep, 500
+    Send, {WheelDown 3}
+    Sleep, 500
+    SafeClick(750, 800)
+    Sleep, 500
+    Loop, 30
+    {
+        SafeClick(750, 650)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 500)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+return
+MoonMelonSeed:
+    Sleep, 500
+    Send, {WheelDown 4}
+    Sleep, 500
+    SafeClick(750, 850)
+    Sleep, 500
+    Loop, 30
+    {
+        SafeClick(750, 680)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 500)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+return
+StarCaller:
+    Sleep, 500
+    Send, {WheelDown 5}
+    Sleep, 500
+    SafeClick(750, 850)
+    Sleep, 500
+    Loop, 30
+    {
+        SafeClick(750, 690)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 500)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+return
+BloodKiwi:
+    Sleep, 500
+    Send, {WheelDown 7}
+    Sleep, 500
+    SafeClick(750, 840)
+    Sleep, 500
+    Loop, 30
+    {
+        SafeClick(750, 700)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 500)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+return
+BloodHedgehog:
+    Sleep, 500
+    Send, {WheelDown 9}
+    Sleep, 500
+    SafeClick(750, 830)
+    Sleep, 500
+    Loop, 30
+    {
+        SafeClick(750, 700)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 500)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+return
+BloodOwl:
+    Sleep, 500
+    Send, {WheelDown 12}
+    Sleep, 500
+    SafeClick(750, 670)
+    Sleep, 500
+    Loop, 30
+    {
+        SafeClick(750, 720)
+        Sleep, 15
+    }
+    Sleep, 500
+    SafeClick(750, 500)
+    Sleep, 500
+    Send, {WheelUp 40}
+    Sleep, 500
+return
+
 
 ; ========== HOTKEYS & INCLUDE ==========
 
 SaveSettings:
     Gui, Submit, NoHide
-IniWrite, %userName%, %settingsFile%, Main, RobloxUser
 
 
     ; — now write them out —
     IniWrite, % (EggBuyAll ? 1 : 0), %settingsFile%, Egg, BuyAll
 
+    IniWrite, % (GearBuyAll  ? 1 : 0), %settingsFile%, Gear, BuyAll
     Loop, % gearItems.Length()
         IniWrite, % (GearItem%A_Index% ? 1 : 0), %settingsFile%, Gear, Item%A_Index%
 
+    IniWrite, % (SeedBuyAll  ? 1 : 0), %settingsFile%, Seed, BuyAll
     Loop, % seedItems.Length()
         IniWrite, % (SeedItem%A_Index% ? 1 : 0), %settingsFile%, Seed, Item%A_Index%
+
+    IniWrite, % (MoonBuyAll  ? 1 : 0), %settingsFile%, Moon, BuyAll
+    Loop, % moonItems.Length()
+        IniWrite, % (MoonItem%A_Index% ? 1 : 0), %settingsFile%, Moon, Item%A_Index%
+
 Return
 
 ; ─── temp 
-/*
+
 F4::
     actionQueue.Push("seedShopPath")
-    actionQueue.Push("slot" slotChoice "gearShopPath")
-Return
+    actionQueue.Push("gearShopPath")
+return
 
 F3::
-    ; actionQueue.Push("sell")
-    actionQueue.Push("slot" slotChoice "EggShopPath")
-Return
-*/
+
+return
 
 ; ─── common STOP/RELOAD routine ───────────────────────────────────────────────
 StopMacro(terminate := 1) {
     Gui, Submit, NoHide
+    ; SendWebhook("Macro stopped)
     Sleep, 50
     started := false
     Gosub, SaveSettings
@@ -887,6 +1696,5 @@ F7::
 ; ─── F5 still starts your scan ───────────────────────────────────────────────
 F5::Gosub, StartScan
 
-; ─── ensure you still include Vis2 and other directives ─────────────────────
+; ─── ensure you still include other directives ─────────────────────
 #MaxThreadsPerHotkey, 2
-#Include %A_ScriptDir%\lib\Vis2.ahk
