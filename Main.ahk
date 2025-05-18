@@ -60,60 +60,78 @@ ShowGui:
     Gui, Color, 0x202020
     Gui, Font, s10 cWhite, Segoe UI
 
-; ======== Gear Shop Items ========
-Gui, Font, s9 cWhite, Segoe UI
-Gui, Add, GroupBox, x20 y50 w260 h300 cWhite, Gear Shop Items
-IniRead, GearBuyAll, %settingsFile%, Gear, BuyAll, 0
-options := "x40 y70 vGearBuyAll cWhite " . (GearBuyAll ? "Checked" : "")
-Gui, Add, Checkbox, %options%, Buy All Gear
-Loop, % gearItems.Length() {
-    IniRead, gVal, %settingsFile%, Gear, Item%A_Index%, 0
-    y := 100 + (A_Index - 1) * 25
-    options := "x40 y" y " vGearItem" A_Index " cWhite " . (gVal ? "Checked" : "")
-    Gui, Add, Checkbox, %options%, % gearItems[A_Index]
-}
+    ; Load saved "Buy All" flags
+    IniRead, GearBuyAll, %settingsFile%, Gear, BuyAll, 0
+    IniRead, EggBuyAll,  %settingsFile%, Egg,  BuyAll, 0
+    IniRead, SeedBuyAll, %settingsFile%, Seed, BuyAll, 0
+    IniRead, MoonBuyAll, %settingsFile%, Moon, BuyAll, 0
 
-; ======== Egg Shop Items ========
-Gui, Add, GroupBox, x300 y50 w260 h260 cWhite, Egg Shop
-IniRead, EggBuyAll, %settingsFile%, Egg, BuyAll, 0
-options := "x320 y70 vEggBuyAll cWhite " . (EggBuyAll ? "Checked" : "")
-Gui, Add, Checkbox, %options%, Buy All Eggs
+    ; --- Main Tab Control ---
+    Gui, Add, Tab2, x10 y10 w600 h450 vMainTab, Gear|Egg|Seeds|Moon|Donate
 
-; ======== Seed Shop Items ========
-Gui, Add, GroupBox, x20 y370 w560 h330 cWhite, Seed Shop Items
-IniRead, SeedBuyAll, %settingsFile%, Seed, BuyAll, 0
-options := "x40 y390 vSeedBuyAll cWhite " . (SeedBuyAll ? "Checked" : "")
-Gui, Add, Checkbox, %options%, Buy All Seeds
-Loop, % seedItems.Length() {
-    IniRead, sVal, %settingsFile%, Seed, Item%A_Index%, 0
-    col := (A_Index > 10 ? 300 : 40)
-    idx := (A_Index > 10 ? A_Index-10 : A_Index)
-    y := 420 + (idx - 1) * 25
-    options := "x" col " y" y " vSeedItem" A_Index " cWhite " . (sVal ? "Checked" : "")
-    Gui, Add, Checkbox, %options%, % seedItems[A_Index]
-}
+    ; --- Gear Shop Tab ---
+    Gui, Tab, Gear
+    Gui, Font, s9 cWhite, Segoe UI
+    Gui, Add, GroupBox, x20 y40 w560 h300 cWhite, Gear Shop Items
+    options := "x40 y70 vGearBuyAll cWhite gSaveSettings " (GearBuyAll ? "Checked" : "")
+    Gui, Add, Checkbox, %options%, Buy All Gear
+    Loop, % gearItems.Length() {
+        IniRead, gVal, %settingsFile%, Gear, Item%A_Index%, 0
+        y := 100 + (A_Index - 1) * 25
+        options := "x40 y" y " vGearItem" A_Index " cWhite gSaveSettings " (gVal ? "Checked" : "")
+        Gui, Add, Checkbox, %options%, % gearItems[A_Index]
+    }
 
-; ======== Moon Shop Items ========
-Gui, Add, GroupBox, x20 y730 w560 h200 cWhite, Moon Shop Items
-IniRead, MoonBuyAll, %settingsFile%, Moon, BuyAll, 0
-options := "x40 y750 vMoonBuyAll cWhite " . (MoonBuyAll ? "Checked" : "")
-Gui, Add, Checkbox, %options%, Buy All Moon Items
-Loop, % moonItems.Length() {
-    IniRead, mVal, %settingsFile%, Moon, Item%A_Index%, 0
-    col := (A_Index > 5 ? 300 : 40)
-    idx := (A_Index > 5 ? A_Index-5 : A_Index)
-    y := 780 + (idx - 1) * 25
-    options := "x" col " y" y " vMoonItem" A_Index " cWhite " . (mVal ? "Checked" : "")
-    Gui, Add, Checkbox, %options%, % moonItems[A_Index]
-}
+    ; --- Egg Shop Tab ---
+    Gui, Tab, Egg
+    Gui, Font, s9 cWhite, Segoe UI
+    Gui, Add, GroupBox, x20 y40 w560 h200 cWhite, Egg Shop
+    options := "x40 y70 vEggBuyAll cWhite gSaveSettings " (EggBuyAll ? "Checked" : "")
+    Gui, Add, Checkbox, %options%, Buy All Eggs
 
-; ======== Action Buttons ========
-Gui, Font, s10 cWhite Bold, Segoe UI
-Gui, Add, Button, x50 y950 w200 h40 gStartScan Background202020, Start Macro (F5)
-Gui, Add, Button, x350 y950 w200 h40 gQuit Background202020, Exit Macro (F7)
+    ; --- Seed Shop Tab ---
+    Gui, Tab, Seeds
+    Gui, Font, s9 cWhite, Segoe UI
+    Gui, Add, GroupBox, x20 y40 w560 h330 cWhite, Seed Shop Items
+    options := "x40 y70 vSeedBuyAll cWhite gSaveSettings " (SeedBuyAll ? "Checked" : "")
+    Gui, Add, Checkbox, %options%, Buy All Seeds
+    Loop, % seedItems.Length() {
+        IniRead, sVal, %settingsFile%, Seed, Item%A_Index%, 0
+        col := (A_Index > 10 ? 300 : 40)
+        idx := (A_Index > 10 ? A_Index - 10 : A_Index)
+        y := 120 + (idx - 1) * 25
+        options := "x" col " y" y " vSeedItem" A_Index " cWhite gSaveSettings " (sVal ? "Checked" : "")
+        Gui, Add, Checkbox, %options%, % seedItems[A_Index]
+    }
 
-; Show full window
-Gui, Show, w620 h1020, Virage Grow a Garden Macro [BLOOD MOON UPDATE]
+    ; --- Moon Shop Tab ---
+    Gui, Tab, Moon
+    Gui, Font, s9 cWhite, Segoe UI
+    Gui, Add, GroupBox, x20 y40 w560 h200 cWhite, Moon Shop Items
+    options := "x40 y70 vMoonBuyAll cWhite gSaveSettings " (MoonBuyAll ? "Checked" : "")
+    Gui, Add, Checkbox, %options%, Buy All Moon Items
+    Loop, % moonItems.Length() {
+        IniRead, mVal, %settingsFile%, Moon, Item%A_Index%, 0
+        col := (A_Index > 5 ? 300 : 40)
+        idx := (A_Index > 5 ? A_Index - 5 : A_Index)
+        y := 120 + (idx - 1) * 25
+        options := "x" col " y" y " vMoonItem" A_Index " cWhite gSaveSettings " (mVal ? "Checked" : "")
+        Gui, Add, Checkbox, %options%, % moonItems[A_Index]
+    }
+    ; --- Donate Tab ---
+    Gui, Tab, Donate
+    Gui, Font, s9 cWhite, Segoe UI
+    Gui, Add, Button, x50 y100 w150 h30 gDonate100, 100 Robux
+    Gui, Add, Button, x225 y100 w150 h30 gDonate1000, 1000 Robux
+    Gui, Add, Button, x400 y100 w150 h30 gDonate10000, 10000 Robux
+
+    ; --- Action Buttons ---
+    Gui, Tab
+    Gui, Font, s10 cWhite Bold, Segoe UI
+    Gui, Add, Button, x120 y480 w180 h30 gStartScan Background202020, Start Macro (F5)
+    Gui, Add, Button, x320 y480 w180 h30 gQuit       Background202020, Exit Macro (F7)
+
+    Gui, Show, w620 h600, Virage Grow a Garden Macro [BLOOD MOON UPDATE]
 
 ; ========== ITEM SELECTION ==========
 UpdateSelectedItems:
@@ -133,8 +151,6 @@ UpdateSelectedItems:
         if (MoonItem%A_Index%)
             selectedMoonItems.Push(moonItems[A_Index])
     }
-
-
 Return
 
 
@@ -247,6 +263,19 @@ alignment:
     Send, {o up}
     Sleep, 200
 Return
+
+; ========== Donation Handlers ==========
+Donate100:
+    Run, https://www.roblox.com/game-pass/1197306369/100-Donation
+return
+
+Donate1000:
+    Run, https://www.roblox.com/game-pass/1222262383/1000-Donation
+return
+
+Donate10000:
+    Run, https://www.roblox.com/game-pass/1220930414/10-000-Donation
+return
 
 
 
@@ -392,16 +421,12 @@ seedShopPath:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
-  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
-    if (!ErrorLevel) {
-    Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
     for index, item in selectedSeedItems {
         label := StrReplace(item, " ", "")
         Gosub, %label%
         Sleep, 300
-    }
     }
     Sleep, 500
     SafeClick(1290,260)
@@ -425,14 +450,10 @@ seedShopPathAll:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
-  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
-    if (!ErrorLevel) {
-    Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
     Gosub, BuyAllSeed
     Sleep, 500
-    }
     SafeClick(1290,260)
     Sleep, 500
     SafeClick(1000,150)
@@ -452,14 +473,10 @@ seedShopPathAll:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
-  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
-    if (!ErrorLevel) {
-    Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
     Gosub, BuyAllSeed
     Sleep, 500
-    }
     SafeClick(1290,260)
     Sleep, 500
 Return
@@ -481,16 +498,12 @@ gearShopPath:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
-  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
-    if (!ErrorLevel) {
-    Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
     for index, item in selectedGearItems {
         label := StrReplace(item, " ", "")
         Gosub, %label%
         Sleep, 300
-    }
     }
     Sleep, 500
     SafeClick(1290,260)
@@ -518,12 +531,8 @@ gearShopPathAll:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
-  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
-    if (!ErrorLevel) {
-    Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
-    }
     Gosub, BuyAllGear
     Sleep, 500
     SafeClick(1290,260)
@@ -547,12 +556,8 @@ gearShopPathAll:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
-  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
-    if (!ErrorLevel) {
-    Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
-    }
     Gosub, BuyAllGear
     Sleep, 500
     SafeClick(1290,260)
@@ -1632,24 +1637,17 @@ return
 
 SaveSettings:
     Gui, Submit, NoHide
-
-
-    ; — now write them out —
-    IniWrite, % (EggBuyAll ? 1 : 0), %settingsFile%, Egg, BuyAll
-
-    IniWrite, % (GearBuyAll  ? 1 : 0), %settingsFile%, Gear, BuyAll
+    IniWrite, % (GearBuyAll ? 1 : 0), %settingsFile%, Gear, BuyAll
+    IniWrite, % (EggBuyAll  ? 1 : 0), %settingsFile%, Egg,  BuyAll
+    IniWrite, % (SeedBuyAll ? 1 : 0), %settingsFile%, Seed, BuyAll
+    IniWrite, % (MoonBuyAll ? 1 : 0), %settingsFile%, Moon, BuyAll
     Loop, % gearItems.Length()
         IniWrite, % (GearItem%A_Index% ? 1 : 0), %settingsFile%, Gear, Item%A_Index%
-
-    IniWrite, % (SeedBuyAll  ? 1 : 0), %settingsFile%, Seed, BuyAll
     Loop, % seedItems.Length()
         IniWrite, % (SeedItem%A_Index% ? 1 : 0), %settingsFile%, Seed, Item%A_Index%
-
-    IniWrite, % (MoonBuyAll  ? 1 : 0), %settingsFile%, Moon, BuyAll
     Loop, % moonItems.Length()
         IniWrite, % (MoonItem%A_Index% ? 1 : 0), %settingsFile%, Moon, Item%A_Index%
-
-Return
+return
 
 ; ─── temp 
 
