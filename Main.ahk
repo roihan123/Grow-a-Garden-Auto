@@ -107,9 +107,9 @@ ShowGui:
     ; --- Moon Shop Tab ---
     Gui, Tab, Moon
     Gui, Font, s9 cWhite, Segoe UI
-    Gui, Add, GroupBox, x20 y40 w560 h200 cWhite, Moon Shop Items
+    Gui, Add, GroupBox, x20 y40 w560 h200 cWhite, Blood 111Moon Shop Items
     options := "x40 y70 vMoonBuyAll cWhite gSaveSettings " (MoonBuyAll ? "Checked" : "")
-    Gui, Add, Checkbox, %options%, Buy All Moon Items
+    Gui, Add, Checkbox, %options%, Buy All Blood Moon Items
     Loop, % moonItems.Length() {
         IniRead, mVal, %settingsFile%, Moon, Item%A_Index%, 0
         col := (A_Index > 5 ? 300 : 40)
@@ -413,13 +413,12 @@ seedShopPath:
     Sleep, 500
     SafeClick(675, 130)
     Sleep, 500
-    Send, {a down}
-    Sleep, 500
-    Send, {a up}
-    Sleep, 500
     Send {e}
     Sleep, 2000
     SafeClick(1305, 351)
+    Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
     Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
@@ -427,6 +426,7 @@ seedShopPath:
         label := StrReplace(item, " ", "")
         Gosub, %label%
         Sleep, 300
+    }
     }
     Sleep, 500
     SafeClick(1290,260)
@@ -442,18 +442,18 @@ seedShopPathAll:
     Sleep, 500
     SafeClick(675, 130)
     Sleep, 500
-    Send, {a down}
-    Sleep, 500
-    Send, {a up}
-    Sleep, 500
     Send {e}
     Sleep, 2000
     SafeClick(1305, 351)
+    Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
     Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
     Gosub, BuyAllSeed
     Sleep, 500
+    }
     SafeClick(1290,260)
     Sleep, 500
     SafeClick(1000,150)
@@ -465,18 +465,18 @@ seedShopPathAll:
     Sleep, 500
     SafeClick(675, 130)
     Sleep, 500
-    Send, {a down}
-    Sleep, 500
-    Send, {a up}
-    Sleep, 500
     Send {e}
     Sleep, 2000
     SafeClick(1305, 351)
+    Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
     Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
     Gosub, BuyAllSeed
     Sleep, 500
+    }
     SafeClick(1290,260)
     Sleep, 500
 Return
@@ -498,12 +498,16 @@ gearShopPath:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
+    Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
     for index, item in selectedGearItems {
         label := StrReplace(item, " ", "")
         Gosub, %label%
         Sleep, 300
+    }
     }
     Sleep, 500
     SafeClick(1290,260)
@@ -531,8 +535,12 @@ gearShopPathAll:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
+    Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
+    }
     Gosub, BuyAllGear
     Sleep, 500
     SafeClick(1290,260)
@@ -556,8 +564,12 @@ gearShopPathAll:
     Sleep, 2000
     SafeClick(1305, 351)
     Sleep, 300
+  PixelSearch, px, py, 80, 50, 1900, 900, 0xFFCC00, 0, Fast RGB
+    if (!ErrorLevel) {
+    Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
+    }
     Gosub, BuyAllGear
     Sleep, 500
     SafeClick(1290,260)
