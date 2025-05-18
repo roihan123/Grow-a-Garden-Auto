@@ -1,4 +1,4 @@
-; Virage Grow a Garden Macro [BLOOD MOON UPDATE]
+; Virage Grow a Garden Macro [Blood Moon Update v2]
 
 #SingleInstance, Force
 #NoEnv
@@ -9,26 +9,41 @@ SetWinDelay, -1
 SetControlDelay, -1
 SetBatchLines, -1
 
-   
 
 settingsFile := A_ScriptDir "\settings.ini"
 
+IniRead, SendDiscord, %settingsFile%, Settings, SendDiscord, 1
+IniRead, webhookURL,   %settingsFile%, Settings, WebhookURL
 
 
-global webhookURL := "https://discord.com/api/webhooks/1193614908139503616/erD8p_BAoCkL4_6jxLToZU73hIAZt67QJERK_ZUwylr9svPACUj0FWEDWVfKpN6klVBu"
 
-SendWebhook(msg) {
-    global webhookURL
-    FormatTime, timestamp,, yyyy-MM-dd HH:mm:ss
-    json := "{""content"":""[" timestamp "] " msg """}"
+; create your webhook options object
+webOptions := {}
+webOptions["WebhookEnabled"] := SendDiscord
+webOptions["WebhookLink"]    := webhookURL
 
-    try {
-        http := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-        http.Open("POST", webhookURL, false)
-        http.SetRequestHeader("Content-Type", "application/json")
-        http.Send(json)
-    } 
+
+
+webhookPostSimple(content) {
+    global webOptions
+      if !webOptions.WebhookEnabled || !webOptions.WebhookLink
+        return
+
+    json := "{""content"":""" content """}"
+    wh := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+    wh.Open("POST", webOptions.WebhookLink, false)
+    wh.SetRequestHeader("Content-Type", "application/json")
+    wh.Send(json)
+
+    if (wh.Status != 204){
+        MsgBox, 16, Webhook Error, % "HTTP " wh.Status "`n" wh.ResponseText
 }
+}
+
+
+
+
+
 
 ; ======== Global Data & Defaults ========
 seedItems   := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange Tulip"
@@ -51,23 +66,69 @@ SetTimer, PushMoonShop, 60000
 ; ======== Script State Flags ========
 started    := false
 
-Gosub, ShowGui
+IniRead, FirstRun, %settingsFile%, Settings, FirstRun, 1
+if (FirstRun)
+    Gosub, ShowWelcome
+else
+    Gosub, ShowGui
+return
+
+ShowWelcome:
+    Gui, 99: Destroy
+    Gui, 99: +AlwaysOnTop -Resize +ToolWindow
+    Gui, 99: Margin, 10, 10
+    Gui, 99: Add, Picture, x0 y0 w768 h432, %A_ScriptDir%\Images\welcome.png
+    Gui, 99: Add, Button, xm y+10 w200 h40 gContinue, Continue
+    Gui, 99: Show, w788 h492 Center, Welcome to Virage Grow a Garden Macro V3
+return
+
+
+Continue:
+    Gui, 99: Destroy
+
+IniWrite, 0, %settingsFile%, Settings, FirstRun
+
+if (webhookURL = "") {
+    msg =
+    (
+    Would you like to enter your Discord webhook URL now?
+    Yes = paste webhook URL & enable Discord notifications
+    No  = skip Discord notifications entirely
+    )
+
+    MsgBox, 4, Discord Webhook Setup, %msg%
+    IfMsgBox, No
+        webhookURL := "" 
+    else {
+        InputBox, webhookURL, Discord Webhook URL, Please paste your Discord webhook URL:
+        if ErrorLevel
+            ExitApp
+    }
+    IniWrite, %webhookURL%, %settingsFile%, Settings, WebhookURL
+    webOptions["WebhookLink"] := webhookURL
+}
+
+
+    Gosub, ShowGui
+return
+
 
 ShowGui:
     Gui, Destroy
     Gui, +Resize +MinimizeBox +SysMenu
     Gui, Margin, 10, 10
-    Gui, Color, 0x202020
+
+    IniRead, uiColor, %settingsFile%, Settings, UIColor, 202020
+    Gui, Color, 0x%uiColor%
     Gui, Font, s10 cWhite, Segoe UI
 
-    ; Load saved "Buy All" flags
     IniRead, GearBuyAll, %settingsFile%, Gear, BuyAll, 0
     IniRead, EggBuyAll,  %settingsFile%, Egg,  BuyAll, 0
     IniRead, SeedBuyAll, %settingsFile%, Seed, BuyAll, 0
     IniRead, MoonBuyAll, %settingsFile%, Moon, BuyAll, 0
 
     ; --- Main Tab Control ---
-    Gui, Add, Tab2, x10 y10 w600 h450 vMainTab, Gear|Egg|Seeds|Moon|Donate
+    Gui, Add, Tab2, x10 y10 w600 h450 vMainTab, Gear|Egg|Seeds|Moon|Donate|Settings
 
     ; --- Gear Shop Tab ---
     Gui, Tab, Gear
@@ -107,9 +168,9 @@ ShowGui:
     ; --- Moon Shop Tab ---
     Gui, Tab, Moon
     Gui, Font, s9 cWhite, Segoe UI
-    Gui, Add, GroupBox, x20 y40 w560 h200 cWhite, Blood 111Moon Shop Items
+    Gui, Add, GroupBox, x20 y40 w560 h200 cWhite, Moon Shop Items
     options := "x40 y70 vMoonBuyAll cWhite gSaveSettings " (MoonBuyAll ? "Checked" : "")
-    Gui, Add, Checkbox, %options%, Buy All Blood Moon Items
+    Gui, Add, Checkbox, %options%, Buy All Moon Items
     Loop, % moonItems.Length() {
         IniRead, mVal, %settingsFile%, Moon, Item%A_Index%, 0
         col := (A_Index > 5 ? 300 : 40)
@@ -118,20 +179,91 @@ ShowGui:
         options := "x" col " y" y " vMoonItem" A_Index " cWhite gSaveSettings " (mVal ? "Checked" : "")
         Gui, Add, Checkbox, %options%, % moonItems[A_Index]
     }
-    ; --- Donate Tab ---
-    Gui, Tab, Donate
+
+; --- Donate Tab ---
+Gui, Tab, Donate
+Gui, Font, s9 cWhite, Segoe UI
+Gui, Add, Button, x15  y50 w110 h30 gDonate100,    100 Robux
+Gui, Add, Button, x135 y50 w110 h30 gDonate500,    500 Robux
+Gui, Add, Button, x255 y50 w110 h30 gDonate1000,  1,000 Robux
+Gui, Add, Button, x375 y50 w110 h30 gDonate2500,  2,500 Robux
+Gui, Add, Button, x495 y50 w110 h30 gDonate10000,10,000 Robux
+
+
+Gui, Font, s10 cWhite, Segoe UI
+Gui, Add, Text, x80 y100 w460 +Center, Top Donators:
+
+; Row 1
+Gui, Font, s9 cWhite, Segoe UI
+Gui, Add, Picture, x160 y118 w32 h32, %A_ScriptDir%\Images\avatars\KeoniHater666.png
+Gui, Add, Text,    x200 y130 w220 h32, KeoniHater666
+Gui, Add, Text,    x340 y130 w80  h32 +Right, 2000
+
+; Row 2
+Gui, Add, Picture, x160 y162 w32 h32, %A_ScriptDir%\Images\avatars\TheRealXZRpro.png
+Gui, Add, Text,    x200 y170 w220 h32, TheRealXZRpro
+Gui, Add, Text,    x340 y170 w80  h32 +Right, 100
+
+; Row 3
+Gui, Add, Picture, x160 y202 w32 h32, %A_ScriptDir%\Images\avatars\BLXRMAD.png
+Gui, Add, Text,    x200 y210 w220 h32, BLXRMAD
+Gui, Add, Text,    x340 y210 w80  h32 +Right, 100
+
+; Row 4
+Gui, Add, Picture, x160 y242 w32 h32, %A_ScriptDir%\Images\avatars\peanut1268a.png
+Gui, Add, Text,    x200 y250 w220 h32, peanut1268a
+Gui, Add, Text,    x340 y250 w80  h32 +Right, 100
+
+; Row 5
+Gui, Add, Picture, x160 y278 w32 h32, %A_ScriptDir%\Images\avatars\Gurkendippp.png
+Gui, Add, Text,    x200 y290 w220 h32, Gurkendippp
+Gui, Add, Text,    x340 y290 w80  h32 +Right, 100
+
+; Row 6
+Gui, Add, Picture, x160 y330 w32 h32
+Gui, Add, Text,    x200 y330 w220 h32, NA
+Gui, Add, Text,    x340 y330 w80  h32 +Right, 0
+
+; Row 7
+Gui, Add, Picture, x160 y370 w32 h32
+Gui, Add, Text,    x200 y370 w220 h32, NA
+Gui, Add, Text,    x340 y370 w80  h32 +Right, 0
+
+; Row 8
+Gui, Add, Picture, x160 y410 w32 h32
+Gui, Add, Text,    x200 y410 w220 h32, NA
+Gui, Add, Text,    x340 y410 w80  h32 +Right, 0
+
+
+
+    ; --- Settings Tab ---
+    Gui, Tab, Settings
     Gui, Font, s9 cWhite, Segoe UI
-    Gui, Add, Button, x50 y100 w150 h30 gDonate100, 100 Robux
-    Gui, Add, Button, x225 y100 w150 h30 gDonate1000, 1000 Robux
-    Gui, Add, Button, x400 y100 w150 h30 gDonate10000, 10000 Robux
+
+    IniRead, SendDiscord, %settingsFile%, Settings, SendDiscord, 1
+    IniRead, webhookURL, %settingsFile%, Settings, WebhookURL
+
+options.WebhookImportantOnly := 0   
+
+checkOpts := "x20 y160 vSendDiscord gSaveSettings "
+if (SendDiscord)
+    checkOpts .= "Checked"
+Gui, Add, Checkbox, %checkOpts%, Enable Discord notifications
+
+
+    Gui, Add, Text, x20 y40, Discord Webhook URL:
+    Gui, Add, Edit, x20 y60 w500 vWebhookURL gSaveSettings Background%uiColor% cBlack, %webhookURL%
+    Gui, Add, Text, x20 y100, UI Color:
+    Gui, Add, Edit, x20 y120 w100 vUIColor gSaveSettings Background%uiColor% cBlack, %uiColor%
 
     ; --- Action Buttons ---
-    Gui, Tab
+    Gui, Tab  ; back to main
     Gui, Font, s10 cWhite Bold, Segoe UI
-    Gui, Add, Button, x120 y480 w180 h30 gStartScan Background202020, Start Macro (F5)
-    Gui, Add, Button, x320 y480 w180 h30 gQuit       Background202020, Exit Macro (F7)
+    Gui, Add, Button, x120 y500 w180 h30 gStartScan Background202020, Start Macro (F5)
+    Gui, Add, Button, x320 y500 w180 h30 gQuit       Background202020, Exit Macro (F7)
 
-    Gui, Show, w620 h600, Virage Grow a Garden Macro [BLOOD MOON UPDATE]
+    Gui, Show, w620 h600, Virage Grow a Garden Macro [Blood Moon Update v2]
+return
 
 ; ========== ITEM SELECTION ==========
 UpdateSelectedItems:
@@ -177,7 +309,10 @@ GetSelectedItems() {
 
 ; ========== MAIN ENTRY ==========
 StartScan:
-    started    := true
+    Gosub, SaveSettings
+
+    started := true
+
 
 altIDs := []    
 actionQueue := []
@@ -204,10 +339,10 @@ if (idList >= 2) {
     Gosub, UpdateSelectedItems
     itemsText := GetSelectedItems()
 
+webhookPostSimple("Macro **started**!")
+
     ToolTip, Starting macro
-
     Sleep, 500
-
     Gosub, alignment
     ToolTip 
 
@@ -240,37 +375,50 @@ alignment:
     for index, winID in altIDs {
         WinActivate % "ahk_id " winID
         WinWaitActive, ahk_id %winID%,, 2
-    Sleep, 200
-    Send, {i down}
-    Sleep, 1200
-    Send, {i up}
-    Sleep, 200
-    Send, {o down}
-    Sleep, 700
-    Send, {o up}
-    Sleep, 200
+Loop, 40 {
+        Send, {WheelUp}
+        Sleep, 20
+    }
+
+    Sleep, 500
+
+    Loop, 6 {
+        Send, {WheelDown}
+        Sleep, 20
+    }
     }
 
 
     WinActivate % "ahk_id " mainID
-    Sleep, 200
-    Send, {i down}
-    Sleep, 1200
-    Send, {i up}
-    Sleep, 200
-    Send, {o down}
-    Sleep, 700
-    Send, {o up}
-    Sleep, 200
+Loop, 40 {
+        Send, {WheelUp}
+        Sleep, 20
+    }
+
+    Sleep, 500
+
+    Loop, 6 {
+        Send, {WheelDown}
+        Sleep, 20
+    }
 Return
 
 ; ========== Donation Handlers ==========
+
 Donate100:
     Run, https://www.roblox.com/game-pass/1197306369/100-Donation
 return
 
+Donate500:
+    Run, https://www.roblox.com/game-pass/1222540123/500-Donation
+return
+
 Donate1000:
     Run, https://www.roblox.com/game-pass/1222262383/1000-Donation
+return
+
+Donate2500:
+    Run, https://www.roblox.com/game-pass/1222306189/2500-Donation
 return
 
 Donate10000:
@@ -304,7 +452,7 @@ buyMoonShop:
         Gosub, redMoonPathAll
         Return
     }
-    if (selectedmoonItems.Length())
+    if (selectedMoonItems.Length())
         Gosub, redMoonPath
 Return
 
@@ -372,10 +520,6 @@ EggShopPath:
     Sleep, 18000
     Send, {d up}
     Sleep, 500
-    Send, {i down}
-    Sleep, 300
-    Send, {i up}
-    Sleep, 500
     Send, {e}
     Sleep, 800
     SafeClick(900,680)
@@ -404,8 +548,6 @@ EggShopPath:
     Sleep, 500
     SafeClick(1000,150)
     Sleep, 500
-    Gosub, alignment
-    Sleep, 200
 Return
 
 seedShopPath:
@@ -689,6 +831,12 @@ buyAllSeed:
     Sleep, 200
     SafeClick(750, 450)
     Sleep, 200
+PixelSearch, px, py, 80, 50, 1900, 900, 0x26EE26, 0, Fast RGB
+    if (!ErrorLevel) {
+    Sleep, 100
+
+    Sleep, 100
+    }
     Loop, 30 {
         SafeClick(750, 630)
         Sleep, 15
@@ -1648,11 +1796,27 @@ return
 ; ========== HOTKEYS & INCLUDE ==========
 
 SaveSettings:
-    Gui, Submit, NoHide
+  Gui, Submit, NoHide
+  IniWrite, % (SendDiscord ? 1 : 0), %settingsFile%, Settings, SendDiscord
+  IniWrite, % webhookURL,            %settingsFile%, Settings, WebhookURL
+
+  webOptions.WebhookEnabled := SendDiscord
+  webOptions.WebhookLink    := webhookURL
+
+    IniWrite, %UIColor%,    %settingsFile%, Settings, UIColor
+
+    ; Immediately apply new UI color
+    Gui, Color, 0x%UIColor%
+    GuiControl, +Background%UIColor% +cBlack, WebhookURL
+    GuiControl, +Background%UIColor% +cBlack, UIColor
+
+    ; Save Buy All flags
     IniWrite, % (GearBuyAll ? 1 : 0), %settingsFile%, Gear, BuyAll
     IniWrite, % (EggBuyAll  ? 1 : 0), %settingsFile%, Egg,  BuyAll
     IniWrite, % (SeedBuyAll ? 1 : 0), %settingsFile%, Seed, BuyAll
     IniWrite, % (MoonBuyAll ? 1 : 0), %settingsFile%, Moon, BuyAll
+
+    ; Save individual items
     Loop, % gearItems.Length()
         IniWrite, % (GearItem%A_Index% ? 1 : 0), %settingsFile%, Gear, Item%A_Index%
     Loop, % seedItems.Length()
@@ -1697,6 +1861,7 @@ Quit:
 
 ; ─── F7 hotkey now cleanly reloads ───────────────────────────────────────────
 F7::
+webhookPostSimple("Macro **stopped**!")
     StopMacro(1)  ; prepare for reload, but don’t ExitApp
     Reload        ; AutoHotkey’s built‑in single‑step restart
     return
