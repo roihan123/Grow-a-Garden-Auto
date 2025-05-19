@@ -220,9 +220,9 @@ Gui, Add, Text,    x200 y290 w220 h32, Gurkendippp
 Gui, Add, Text,    x340 y290 w80  h32 +Right, 100
 
 ; Row 6
-Gui, Add, Picture, x160 y330 w32 h32
-Gui, Add, Text,    x200 y330 w220 h32, NA
-Gui, Add, Text,    x340 y330 w80  h32 +Right, 0
+Gui, Add, Picture, x160 y318 w32 h32, %A_ScriptDir%\Images\avatars\Freezy_Zer0.png
+Gui, Add, Text,    x200 y330 w220 h32, Freezy_Zer0
+Gui, Add, Text,    x340 y330 w80  h32 +Right, 100
 
 ; Row 7
 Gui, Add, Picture, x160 y370 w32 h32
