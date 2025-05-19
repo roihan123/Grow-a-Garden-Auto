@@ -79,7 +79,7 @@ ShowWelcome:
     Gui, 99: Margin, 10, 10
     Gui, 99: Add, Picture, x0 y0 w768 h432, %A_ScriptDir%\Images\welcome.png
     Gui, 99: Add, Button, xm y+10 w200 h40 gContinue, Continue
-    Gui, 99: Show, w788 h492 Center, Welcome to Virage Grow a Garden Macro V3
+    Gui, 99: Show, w788 h492 Center, Welcome to Virage's Grow a Garden Macro Blood Moon Update v2
 return
 
 
