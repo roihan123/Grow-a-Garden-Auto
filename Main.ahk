@@ -16,15 +16,11 @@ IniRead, SendDiscord, %settingsFile%, Settings, SendDiscord, 1
 IniRead, webhookURL,   %settingsFile%, Settings, WebhookURL
 
 
-
-; create your webhook options object
 webOptions := {}
 webOptions["WebhookEnabled"] := SendDiscord
 webOptions["WebhookLink"]    := webhookURL
 
-
-
-webhookPostSimple(content) {
+WebhookPostSimple(content) {
     global webOptions
       if !webOptions.WebhookEnabled || !webOptions.WebhookLink
         return
@@ -39,9 +35,6 @@ webhookPostSimple(content) {
         MsgBox, 16, Webhook Error, % "HTTP " wh.Status "`n" wh.ResponseText
 }
 }
-
-
-
 
 
 
@@ -737,8 +730,8 @@ redMoonPath:
     Sleep, 500
     Send {e}
     Sleep, 1500
-ImageSearch, x, y, 0, 0, A_ScreenWidth, A_ScreenHeight, *n Images\moonShop.png
-if (ErrorLevel = 0) {
+PixelSearch, px, py, 611, 235, 1301, 867, 0xFDFD00, 0, Fast RGB
+    if (!ErrorLevel) {
     Sleep, 300
     SafeClick(1305, 351)
     Sleep, 300
@@ -749,7 +742,7 @@ if (ErrorLevel = 0) {
         Gosub, %label%
         Sleep, 300
     }
-} 
+    }  
     Sleep, 500
     SafeClick(1290,260)
     Sleep, 500
@@ -778,15 +771,15 @@ redMoonPathAll:
     Sleep, 500
     Send {e}
     Sleep, 1500
-ImageSearch, x, y, 0, 0, A_ScreenWidth, A_ScreenHeight, *n Images\moonShop.png
-if (ErrorLevel = 0) {
+PixelSearch, px, py, 611, 235, 1301, 867, 0xFDFD00, 0, Fast RGB
+    if (!ErrorLevel) {
     Sleep, 300
     SafeClick(1305, 351)
     Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
     Gosub, BuyAllMoon 
-}    
+    }  
     Sleep, 500
     SafeClick(1290,260)
     Sleep, 500
@@ -809,15 +802,15 @@ if (ErrorLevel = 0) {
     Sleep, 500
     Send {e}
     Sleep, 1500
-ImageSearch, x, y, 0, 0, A_ScreenWidth, A_ScreenHeight, *n Images\moonShop.png
-if (ErrorLevel = 0) {
+PixelSearch, px, py, 611, 235, 1301, 867, 0xFDFD00, 0, Fast RGB
+    if (!ErrorLevel) {
     Sleep, 300
     SafeClick(1305, 351)
     Sleep, 300
     Send, {WheelUp 40}
     Sleep, 300
-    Gosub, BuyAllMoon  
-}   
+    Gosub, BuyAllMoon 
+    } 
     Sleep, 500
     SafeClick(1290,260)
     Sleep, 500
