@@ -7,9 +7,9 @@ A macro for the Roblox game "Grow a Garden"
  - After downloading, extract the ZIP file to your desired directory
 
 Before starting the macro:
--Put your recall wrenches in slot 2
--Set your roblox camera mode to the following --> default(classic)
--Turn on UI navigation in roblox settings
+- Put your recall wrenches in slot 2
+- Set your roblox camera mode to the following --> default(classic)
+- Turn on UI navigation in roblox settings
 
 ## Features
 Virage Grow A Garden Macro has a couple of different features it is capable of. These include:
