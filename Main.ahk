@@ -693,25 +693,25 @@ ShowGui:
     Gui, Add, Text,    x110 y150 w200 h24, KeoniHater666
     Gui, Add, Text,    x350 y150 w100 h24 +Right, 2000
     ; Row 2
-    Gui, Add, Picture, x80  y170 w24 h24, %A_ScriptDir%\Images\avatars\KanniiCom.png
-    Gui, Add, Text,    x110 y180 w200 h24, TheRealXZRpro
-    Gui, Add, Text,    x350 y180 w100 h24 +Right, 500
+    Gui, Add, Picture, x80  y170 w24 h24, %A_ScriptDir%\Images\avatars\peanut1268a.png
+    Gui, Add, Text,    x110 y180 w200 h24, peanut1268a
+    Gui, Add, Text,    x350 y180 w100 h24 +Right, 1100
     ; Row 3
-    Gui, Add, Picture, x80  y200 w24 h24, %A_ScriptDir%\Images\avatars\Whatdidhesayyyy_bruh.png
-    Gui, Add, Text,    x110 y210 w200 h24, Whatdidhesayyyy_bruh
-    Gui, Add, Text,    x350 y210 w100 h24 +Right, 500
+    Gui, Add, Picture, x80  y200 w24 h24, %A_ScriptDir%\Images\avatars\BarlosWithaB.png
+    Gui, Add, Text,    x110 y210 w200 h24, BarlosWithaB
+    Gui, Add, Text,    x350 y210 w100 h24 +Right, 1000
     ; Row 4
-    Gui, Add, Picture, x80  y230 w24 h24, %A_ScriptDir%\Images\avatars\peanut1268a.png
-    Gui, Add, Text,    x110 y240 w200 h24, peanut1268a
-    Gui, Add, Text,    x350 y240 w100 h24 +Right, 100
+    Gui, Add, Picture, x80  y230 w24 h24, %A_ScriptDir%\Images\avatars\KanniiCom.png
+    Gui, Add, Text,    x110 y240 w200 h24, KanniiCom
+    Gui, Add, Text,    x350 y240 w100 h24 +Right, 500
     ; Row 5
-    Gui, Add, Picture, x80  y260 w24 h24, %A_ScriptDir%\Images\avatars\Gurkendippp.png
-    Gui, Add, Text,    x110 y270 w200 h24, Gurkendippp
-    Gui, Add, Text,    x350 y270 w100 h24 +Right, 100
+    Gui, Add, Picture, x80  y260 w24 h24, %A_ScriptDir%\Images\avatars\Whatdidhesayyyy_bruh.png
+    Gui, Add, Text,    x110 y270 w200 h24, Whatdidhesayyyy_bruh
+    Gui, Add, Text,    x350 y270 w100 h24 +Right, 500
     ; Row 6
-    Gui, Add, Picture, x80  y290 w24 h24, %A_ScriptDir%\Images\avatars\Freezy_Zer0.png
-    Gui, Add, Text,    x110 y300 w200 h24, Freezy_Zer0
-    Gui, Add, Text,    x350 y300 w100 h24 +Right, 100
+    Gui, Add, Picture, x80  y290 w24 h24, %A_ScriptDir%\Images\avatars\Jake_XvY.png
+    Gui, Add, Text,    x110 y300 w200 h24, Jake_XvY
+    Gui, Add, Text,    x350 y300 w100 h24 +Right, 200
     ; Row 7
     Gui, Add, Picture, x80  y320 w24 h24, %A_ScriptDir%\Images\avatars\Not_Ausstinn.png
     Gui, Add, Text,    x110 y330 w200 h24, Not_Ausstinn
@@ -1585,7 +1585,7 @@ TwilightShopPath:
             ; SendDiscordMessage(webhookURL, "Twilight Shop Open Detected [Try #" . A_Index . "] <@" . discordUserID . ">")
             SendDiscordMessage(webhookURL, "Twilight Shop Opened.")
             Sleep, 200
-            uiUniversal("6363636161646363636361616464606056", 0)
+            uiUniversal("636363636161646463636363616164606056", 0)
             Sleep, 100
             for index, item in selectedTwilightItems {
                 currentItem := selectedTwilightItems[A_Index]
@@ -1615,7 +1615,7 @@ TwilightShopPath:
             SendDiscordMessage(webhookURL, "Failed To Detect Twilight Shop Opening [Error]")
         }
         ; failsafe
-        uiUniversal("63636362626263616161616363636262626361616161606564616056")
+        uiUniversal("63636362626263616161616363636262626361616161606561646056")
     }
 
     SendDiscordMessage(webhookURL, "**[TWILIGHT COMPLETED]**")
