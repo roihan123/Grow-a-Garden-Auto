@@ -515,7 +515,7 @@ gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Adv
 eggItems := ["Common Egg", "Uncommon Egg", "Rare Egg", "Legendary Egg", "Mythical Egg"
              , "Bug Egg"]
 
-moonItems   := ["Mysterious Crate", "Night Egg", "Night Seed Pack", "Crimson Vine Seed"
+moonItems   := ["Blood Moon Crate", "Night Egg", "Night Seed Pack", "Crimson Vine Seed"
                , "Moon Melon Seed", "Star Caller", "Blood Kiwi", "Blood Hedgehog"
                , "Blood Owl"]
 
@@ -1023,6 +1023,7 @@ if (UseAlts) {
     global lastGearSeedMinute := -1
     global lastEggShopMinute := -1
     global lastCosmeticShopMinute := -1
+    global lastCosmeticShopHour   := -1 
     global lastTwilightMinute  := -1
 
     currentSection := "StartScan"
@@ -1098,10 +1099,8 @@ if (UseAlts) {
         cosmeticAutoActive := 1
         SetTimer, AutoBuyCosmeticShop, 1000 ; checks every second if it should queue
 
-    actionQueue.Push("BuyTwilightShop")
-    twilightAutoActive := 1
-    SetTimer, AutoBuyTwilightShop, 1000
-
+        twilightAutoActive := 1
+        SetTimer, AutoBuyTwilightShop, 1000
 
 
     while (started) {
@@ -1259,15 +1258,20 @@ if (selectedEggItems.Length()) {
 
 Return
 
-AutoBuyCosmeticShop:
 
-    ; queues if its not the first cycle and the time is a multiple of 60 <-- 0 is the only multiple so every hour
-    if (cycleCount > 0 && Mod(currentMinute, 60) = 0 && currentMinute != lastCosmeticShopMinute) {
-        lastCosmeticShopMinute := currentMinute
+AutoBuyCosmeticShop:
+    ; every 4 hours, on the hour (00 minute), but only once per hour
+    if ( cycleCount > 0
+      && currentMinute = 0
+      && Mod(currentHour, 4) = 0
+      && currentHour != lastCosmeticShopHour )
+    {
+        lastCosmeticShopHour := currentHour
         SetTimer, PushBuyCosmeticShop, -10000
     }
-
 Return
+
+
 
 PushBuyCosmeticShop: 
 
