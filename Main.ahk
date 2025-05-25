@@ -212,43 +212,6 @@ getMouseCoord(axis) {
 
 }
 
-ScaleX(refX) {
-    return Round(refX * A_ScreenWidth / 1920)
-}
-
-ScaleY(refY) {
-    return Round(refY * A_ScreenHeight / 1080)
-}
-
-ScaleRegion(refX, refY, refW, refH) {
-    x := ScaleX(refX)
-    y := ScaleY(refY)
-    w := Round(refW * A_ScreenWidth  / 1920)
-    h := Round(refH * A_ScreenHeight / 1080)
-    return [ x, y, w, h ]
-}
-
-ScanText(x, y, w, h, lang := "eng") {
-    region := ScaleRegion(x, y, w, h)
-    if (!IsFunc("OCR")) {
-        MsgBox, 16, Error, OCR() routine not found!
-        return ""
-    }
-
-    raw := OCR(region, "eng", opts)
-
-    ; Flatten newlines into spaces
-    StringReplace, raw, raw, `r`n, %A_Space%, All
-    StringReplace, raw, raw, `n,  %A_Space%, All
-
-    ; Strip out anything that isn’t a letter or space
-    cleaned := RegExReplace(raw, "[^A-Za-z0-9 ]", "")
-
-    ; Lowercase for consistency
-    StringLower, cleaned, cleaned
-
-    return cleaned
-}
 
 ; directional sequence encoder/executor
 ; if you're going to modify the calls to this make sure you know what you're doing (ui navigation has some odd behaviours)
@@ -449,22 +412,10 @@ quickDetect(color1, color2, variation := 10, x1Ratio := 0.0, y1Ratio := 0.0, x2R
                 ToolTip, %currentItem% `nIn Stock
                 SetTimer, HideTooltip, -1500 
                 Sleep, 250
-PixelSearch, FoundX, FoundY, x1, y1, x2, y2, 0x00FF00, 5, Fast RGB
-if (ErrorLevel = 0) {
-    boxW := 300, boxH := 150
-    scanX := Max(FoundX - boxW//2, 0)
-    scanY := Max(FoundY - boxH,     0)
-    Sleep, 100
-    text := ScanText(scanX, scanY, boxW, boxH)
-
-    foundNumber := RegExReplace(text, "\D")
-    if (foundNumber = "")
-        foundNumber := "0"
                 if (ping)
-                    SendDiscordMessage(webhookURL, "Bought x" . foundNumber . " " . currentItem . ". <@" . discordUserID . ">")
+                    SendDiscordMessage(webhookURL, "Bought " . currentItem . ". <@" . discordUserID . ">")
                 else
-                    SendDiscordMessage(webhookURL, "Bought x" . foundNumber . " " . currentItem . ".")
-} 
+                    SendDiscordMessage(webhookURL, "Bought " . currentItem . ".")
                 uiUniversal(506, 0, 1, 1)
                 Sleep, 50
             }
@@ -2228,4 +2179,3 @@ F5::Gosub, StartScan
 
 
 #MaxThreadsPerHotkey, 2
-#Include %A_ScriptDir%\lib\Vis2.ahk
