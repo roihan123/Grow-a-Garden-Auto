@@ -794,7 +794,7 @@ ShowGui:
     Gui, Font, s8 cD3D3D3 Underline, Segoe UI
     Gui, Add, Link, x40 y224 w300 h16, Join the <a href="https://discord.com/invite/BPPSAG8MN5">Discord Server</a>!
     Gui, Add, Link, x40 y244 w300 h16,  Check the <a href="https://github.com/VirageRoblox/Virage-Grow-A-Garden-Macro/releases/latest">Github</a> for the latest macro updates!
-    Gui, Add, Link, x40 y264 w300 h16, Watch the latest macro <a href="https://youtu.be/nR6hl5durL8">tutorial</a> on Youtube!
+    Gui, Add, Link, x40 y264 w300 h16, Watch the latest macro <a href="https://youtu.be/L6GsrZYjECY">tutorial</a> on Youtube!
   
 
 
