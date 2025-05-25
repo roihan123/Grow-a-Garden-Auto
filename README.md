@@ -14,6 +14,8 @@ Before starting the macro:
 ## Features
 Virage Grow A Garden Macro has a couple of different features it is capable of. These include:
 - Automatic buying from all Shops, with the options to check the items you want the macro to purchase
-- Discord Webhook 
+- Discord Webhook integration
+- Multi-alts macroing
+- Fast mode/Slow mode
 
  Discord Server: [https://discord.com/VirageMacros](https://discord.com/invite/BPPSAG8MN5)
