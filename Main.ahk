@@ -227,6 +227,8 @@ uiUniversal(order := 0, exitUi := 1, continuous := 0, spam := 0, spamCount := 30
     if (!continuous) {
         Send, \
         Sleep, 50
+        Send, #
+        Sleep, 50
     }   
 
     ; right = 1, left = 2, up = 3, down = 4, enter = 0, fastmodedelay = 5, delay = 6
@@ -258,6 +260,8 @@ uiUniversal(order := 0, exitUi := 1, continuous := 0, spam := 0, spamCount := 30
     if (exitUi) {
         Sleep, 50
         Send, \
+        Sleep, 50
+        Send, #
     }
 
     return
@@ -688,38 +692,46 @@ ShowGui:
     Gui, Add, Text, x60 y120 w400 +Center, Top Donators:
 
     Gui, Font, s9 cWhite, Segoe UI
-    ; Row 1
-    Gui, Add, Picture, x80  y140 w24 h24, %A_ScriptDir%\Images\avatars\KeoniHater666.png
-    Gui, Add, Text,    x110 y150 w200 h24, KeoniHater666
-    Gui, Add, Text,    x350 y150 w100 h24 +Right, 2000
-    ; Row 2
-    Gui, Add, Picture, x80  y170 w24 h24, %A_ScriptDir%\Images\avatars\peanut1268a.png
-    Gui, Add, Text,    x110 y180 w200 h24, peanut1268a
-    Gui, Add, Text,    x350 y180 w100 h24 +Right, 1100
-    ; Row 3
-    Gui, Add, Picture, x80  y200 w24 h24, %A_ScriptDir%\Images\avatars\BarlosWithaB.png
-    Gui, Add, Text,    x110 y210 w200 h24, BarlosWithaB
-    Gui, Add, Text,    x350 y210 w100 h24 +Right, 1000
-    ; Row 4
-    Gui, Add, Picture, x80  y230 w24 h24, %A_ScriptDir%\Images\avatars\KanniiCom.png
-    Gui, Add, Text,    x110 y240 w200 h24, KanniiCom
-    Gui, Add, Text,    x350 y240 w100 h24 +Right, 500
-    ; Row 5
-    Gui, Add, Picture, x80  y260 w24 h24, %A_ScriptDir%\Images\avatars\Whatdidhesayyyy_bruh.png
-    Gui, Add, Text,    x110 y270 w200 h24, Whatdidhesayyyy_bruh
-    Gui, Add, Text,    x350 y270 w100 h24 +Right, 500
-    ; Row 6
-    Gui, Add, Picture, x80  y290 w24 h24, %A_ScriptDir%\Images\avatars\Jake_XvY.png
-    Gui, Add, Text,    x110 y300 w200 h24, Jake_XvY
-    Gui, Add, Text,    x350 y300 w100 h24 +Right, 200
-    ; Row 7
-    Gui, Add, Picture, x80  y320 w24 h24, %A_ScriptDir%\Images\avatars\Not_Ausstinn.png
-    Gui, Add, Text,    x110 y330 w200 h24, Not_Ausstinn
-    Gui, Add, Text,    x350 y330 w100 h24 +Right, 100
-    ; Row 8
-    Gui, Add, Picture, x80  y350 w24 h24, %A_ScriptDir%\Images\avatars\ballidriptip.png
-    Gui, Add, Text,    x110 y360 w200 h24, ballidriptip
-    Gui, Add, Text,    x350 y360 w100 h24 +Right, 100
+; Row 1
+Gui, Add, Picture, x80  y140 w24 h24, %A_ScriptDir%\Images\avatars\RuizuKun_Dev.png
+Gui, Add, Text,    x110 y150 w200 h24, RuizuKun_Dev
+Gui, Add, Text,    x350 y150 w100 h24 +Right, 10000
+
+; Row 2
+Gui, Add, Picture, x80  y170 w24 h24, %A_ScriptDir%\Images\avatars\KeoniHater666.png
+Gui, Add, Text,    x110 y180 w200 h24, KeoniHater666
+Gui, Add, Text,    x350 y180 w100 h24 +Right, 2000
+
+; Row 3
+Gui, Add, Picture, x80  y200 w24 h24, %A_ScriptDir%\Images\avatars\peanut1268a.png
+Gui, Add, Text,    x110 y210 w200 h24, peanut1268a
+Gui, Add, Text,    x350 y210 w100 h24 +Right, 1100
+
+; Row 4
+Gui, Add, Picture, x80  y230 w24 h24, %A_ScriptDir%\Images\avatars\BarlosWithaB.png
+Gui, Add, Text,    x110 y240 w200 h24, BarlosWithaB
+Gui, Add, Text,    x350 y240 w100 h24 +Right, 1000
+
+; Row 5
+Gui, Add, Picture, x80  y260 w24 h24, %A_ScriptDir%\Images\avatars\thefiredragonbest.png
+Gui, Add, Text,    x110 y270 w200 h24, thefiredragonbest
+Gui, Add, Text,    x350 y270 w100 h24 +Right, 600
+
+; Row 6
+Gui, Add, Picture, x80  y290 w24 h24, %A_ScriptDir%\Images\avatars\KanniiCom.png
+Gui, Add, Text,    x110 y300 w200 h24, KanniiCom
+Gui, Add, Text,    x350 y300 w100 h24 +Right, 500
+
+; Row 7
+Gui, Add, Picture, x80  y320 w24 h24, %A_ScriptDir%\Images\avatars\Whatdidhesayyyy_bruh.png
+Gui, Add, Text,    x110 y330 w200 h24, Whatdidhesayyyy_bruh
+Gui, Add, Text,    x350 y330 w100 h24 +Right, 500
+
+; Row 8
+Gui, Add, Picture, x80  y350 w24 h24, %A_ScriptDir%\Images\avatars\exrjino.png
+Gui, Add, Text,    x110 y360 w200 h24, exrjino
+Gui, Add, Text,    x350 y360 w100 h24 +Right, 500
+
 
     Gui, Tab, 8
     ; Match other tabs: full-size group box
@@ -1294,6 +1306,8 @@ characterAlignment:
     ; aligns character through spam tping and using the follow camera mode
     Send, \
     Sleep, 10
+    Send, #
+    Sleep, 10
     repeatKey("Right", 3)
     Loop, 8 {
     Send, {Enter}
@@ -1306,6 +1320,8 @@ characterAlignment:
     }
     Sleep, 10
     Send, \
+    Send, #
+    Sleep, 10
 
     ToolTip, Alignment complete
     SetTimer, HideTooltip, -2500
