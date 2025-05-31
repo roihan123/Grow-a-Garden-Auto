@@ -1635,7 +1635,7 @@ GearShopPath:
     Sleep, % FastMode ? 3000 : 5000
     SafeClickRelative(0.75, 0.48)
     SendDiscordMessage(webhookURL, "**[GEAR CYCLE]**")
-    Sleep, % FastMode ? 1500 : 5000
+    Sleep, % FastMode ? 2500 : 5000
 
     Loop, 5 {
         if ( simpleDetect(0x00CCFF, 10, 0.54, 0.20, 0.65, 0.325) ) {
