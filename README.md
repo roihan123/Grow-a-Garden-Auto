@@ -7,15 +7,13 @@ A macro for the Roblox game "Grow a Garden"
  - After downloading, extract the ZIP file to your desired directory
 
 Before starting the macro:
-- Put your recall wrenches in slot 2
-- Set your roblox camera mode to the following --> default(classic)
-- Turn on UI navigation in roblox settings
-- **don't** go full screen, be in windowed fullscreen
 - ensure you **extracted** the macro file
-- put "Recall Wrench" in the 2nd hot bar slot --> macro may bug out and not automatically do it
+- **don't** go full screen, be in windowed fullscreen
+- Set your roblox camera mode to the following --> **default(classic)**
+- put "Recall Wrench" in the **2nd hot bar slot** --> macro may bug out and not automatically do it
 - have 5-10 things in your hotbar
-- make sure UI Navigation is on in your Roblox settings
-- unequip your “grey mouse” pet if you have some equipped since they give you a speed bonus that will break the macro
+- make sure UI Navigation is turned **ON** in your Roblox settings
+- unequip your **“grey mouse” pet** if you have some equipped since they give you a speed bonus that will break the macro
 
 ## Features
 Virage Grow A Garden Macro has a couple of different features it is capable of. These include:
