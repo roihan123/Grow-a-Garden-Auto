@@ -1,4 +1,4 @@
-; Virage Grow a Garden Macro [COSMETIC UPDATE]
+; Virage Grow a Garden Macro [BUZZY BEE UPDATE]
 
 #SingleInstance, Force
 #NoEnv
@@ -818,7 +818,7 @@ Gui, Add, Text,    x350 y360 w100 h24 +Right, 600
 
 
 
-    Gui, Show, w520 h425, Virage Grow a Garden Macro [COSMETIC UPDATE]
+    Gui, Show, w520 h425, Virage Grow a Garden Macro [BUZZY BEE UPDATE]
 
 Return
 
