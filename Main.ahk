@@ -1,4 +1,4 @@
-; Virage Grow a Garden Macro [BUZZY BEE UPDATE]
+; Virage Grow a Garden Macro [BIZZY BEE UPDATE]
 
 #SingleInstance, Force
 #NoEnv
@@ -818,7 +818,7 @@ Gui, Add, Text,    x350 y360 w100 h24 +Right, 600
 
 
 
-    Gui, Show, w520 h425, Virage Grow a Garden Macro [BUZZY BEE UPDATE]
+    Gui, Show, w520 h425, Virage Grow a Garden Macro [BIZZY BEE UPDATE]
 
 Return
 
@@ -1632,7 +1632,7 @@ GearShopPath:
     SafeClickRelative(0.5, 0.5)
     Sleep, % FastMode ? 1200 : 2500
     Send {e}
-    Sleep, % FastMode ? 1500 : 5000
+    Sleep, % FastMode ? 3000 : 5000
     SafeClickRelative(0.75, 0.48)
     SendDiscordMessage(webhookURL, "**[GEAR CYCLE]**")
     Sleep, % FastMode ? 1500 : 5000
