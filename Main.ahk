@@ -237,7 +237,7 @@ uiUniversal(order := 0, exitUi := 1, continuous := 0) {
     }
 
     if (!continuous) {
-        Send, %UINavToggle%
+        SendRaw, %UINavToggle%
         Sleep, 50
     }   
 
@@ -269,7 +269,7 @@ uiUniversal(order := 0, exitUi := 1, continuous := 0) {
 
     if (exitUi) {
         Sleep, 50
-        Send, %UINavToggle%
+        SendRaw, %UINavToggle%
     }
 
     return
@@ -1478,7 +1478,7 @@ Return
 characterAlignment:
 
     ; aligns character through spam tping and using the follow camera mode
-    Send, %UINavToggle%
+    SendRaw, %UINavToggle%
     Sleep, 10
     repeatKey("Right", 3)
     Loop, 8 {
@@ -1491,7 +1491,7 @@ characterAlignment:
     repeatKey("Left", 2)
     }
     Sleep, 10
-    Send, %UINavToggle%
+    SendRaw, %UINavToggle%
 
     ToolTip, Alignment complete
     SetTimer, HideTooltip, -2500
