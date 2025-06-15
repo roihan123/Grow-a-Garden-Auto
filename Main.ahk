@@ -843,7 +843,7 @@ seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange Tulip"
              , "Mushroom Seed", "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily Seed", "Sugar Apple"] ;
 
 gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler"
-             , "Godly Sprinkler", "Lightning Rod", "Master Sprinkler", "Cleaning Spray", "Favorite Tool", "Harvest Tool", "Frienship pot"]
+             , "Godly Sprinkler", "Lightning Rod", "Master Sprinkler", "Cleaning Spray", "Favorite Tool", "Harvest Tool", "Friendship pot"]
 
 eggItems := ["Common Egg", "Uncommon Egg", "Rare Egg", "Legendary Egg", "Mythical Egg"
              , "Bug Egg"]
@@ -1051,6 +1051,7 @@ ShowGui:
     Gui, Add, Text, x300 y70 w180 h24, Real
     Gui, Font, s8 cWhite, Segoe UI
     Gui, Add, Text, x300 y96 w180 h40, Greatly helped to modify the macro to make it better and more consistent.
+    Gui, add, Text, x250 y200 w200 h40, Also Credits to Marco
 
     Gui, Font, s9 cWhite Bold, Segoe UI
     Gui, Add, Text, x40 y200 w200 h20, Extra Resources:
@@ -1067,7 +1068,7 @@ ShowGui:
     ; Gui, Add, Button, x50 y270 w100 h25 gDonate vDonate2500 BackgroundF0F0F0, 2500 Robux
     ; Gui, Add, Button, x50 y330 w100 h25 gDonate vDonate10000 BackgroundF0F0F0, 10000 Robux
     
-    Gui, Show, w520 h425, Virage FREE GAG Macro [BIZZY BEES/FRIENDSHIP UPDATE]
+    Gui, Show, w520 h425, Virage FREE GAG Macro [WORKING BEES/CRAFTER UPDATE]
 
 Return
 
