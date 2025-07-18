@@ -1,4 +1,4 @@
-# remake gag macro 
+# updated  gag macro 
 A macro for the Roblox game "Grow a Garden"
 
  ## Installation
