@@ -1,4 +1,4 @@
-# Virage Grow A Garden Macro
+# remake gag macro 
 A macro for the Roblox game "Grow a Garden"
 
  ## Installation
@@ -22,4 +22,3 @@ Virage Grow A Garden Macro has a couple of different features it is capable of. 
 - Multi-alts macroing
 - Fast mode/Slow mode
 
- Discord Server: [https://discord.com/VirageMacros](https://discord.com/invite/BPPSAG8MN5)
