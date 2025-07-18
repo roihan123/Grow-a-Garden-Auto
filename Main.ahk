@@ -1,5 +1,3 @@
-; Virage GAG Macro [FREE VERSION]
-
 #SingleInstance, Force
 #NoEnv
 SetWorkingDir %A_ScriptDir%
@@ -821,14 +819,15 @@ quickDetect(color1, color2, variation := 10, x1Ratio := 0.0, y1Ratio := 0.0, x2R
 
 ; item arrays
 
-seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Tomato Seed"
-             , "Cauliflower Seed", "Watermelon Seed", "Rafflesia Seed"
-             , "Green Apple Seed", "Avocado Seed", "Banana Seed", "Pineapple Seed"
-             , "Kiwi Seed", "Bell Pepper Seed", "Prickly Pear Seed", "Loquat Seed"
-             , "Feijoa Seed", "Pitcher Plant", "Sugar Apple"]
+seedItems := [ "Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange Tulip Seed"
+        , "Tomato Seed", "Corn Seed", "Daffodil Seed", "Watermelon Seed"
+        , "Pumpkin Seed", "Apple Seed", "Bamboo Seed", "Coconut Seed"
+        , "Cactus Seed", "Dragon Fruit Seed", "Mango Seed", "Grape Seed"
+        , "Mushroom Seed", "Pepper Seed", "Cacao Seed", "Beanstalk Seed"
+        , "Ember Lily Seed", "Sugar Apple Seed", "Burning Bud Seed", "Giant Pinecone Seed" ]
 
-gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler"
-             , "Godly Sprinkler", "Magnifying Glass", "Tanning Mirror", "Master Sprinkler", "Cleaning Spray", "Favorite Tool", "Harvest Tool", "Friendship Pot"]
+gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler", "Medium Toy", "Medium Treat"
+             , "Godly Sprinkler", "Magnifying Glass", "Tanning Mirror", "Master Sprinkler", "Cleaning Spray", "Favorite Tool", "Harvest Tool", "Friendship Pot", "Levelup Lollipop"]
 
 eggItems := ["Common Egg", "Common Summer Egg", "Rare Summer Egg", "Mythical Egg", "Paradise Egg"
              , "Bee Egg", "Bug Egg"]
@@ -1117,7 +1116,7 @@ Gui, Add, Edit, x180 y165 w40 h18 Limit1 vSavedKeybind gUpdateKeybind, %SavedKey
     ; Gui, Add, Button, x50 y270 w100 h25 gDonate vDonate2500 BackgroundF0F0F0, 2500 Robux
     ; Gui, Add, Button, x50 y330 w100 h25 gDonate vDonate10000 BackgroundF0F0F0, 10000 Robux
     
-    Gui, Show, w520 h460, Virage Premium GAG Macro [FREE VERSION]
+    Gui, Show, w520 h460, roihan123 gag macro updated.
 
 Return
 
